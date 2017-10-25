@@ -10,7 +10,7 @@ First, check out this repository, as it has all of the code and examples you'll 
 
 To do that you'll need [git](https://git-scm.com/downloads)
 
-Once you have git installed adn the repository cloned, you are ready to start with the first tutorial. The setup tutorial will walk through installing and checking the necessary tools to run the remaining tutorials.
+Once you have git installed and the repository cloned, you are ready to start with the first tutorial. The setup tutorial will walk through installing and checking the necessary tools to run the remaining tutorials.
 
 ### Tutorial Articles 
 
