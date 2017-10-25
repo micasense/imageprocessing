@@ -8,15 +8,13 @@ Tutorial for redEdge image processing
 
 First, check out this repository, as it has all of the code and examples you'll need.
 
-To do that you'll need `git` (which will come in handy later)
+To do that you'll need [git](https://git-scm.com/downloads)
 
-Once you have git installed, you'll want to start with the setup tutorial to get the appropriate tools installed.
-
-[Micasense Image Processing Setup](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Setup.html)
+Once you have git installed adn the repository cloned, you are ready to start with the first tutorial. The setup tutorial will walk through installing and checking the necessary tools to run the remaining tutorials.
 
 ### Tutorial Articles 
 
-1. [MicaSense Image Processing Setup](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Tutorial%20Setup.html)
+1. [MicaSense Image Processing Setup](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Setup.html)
 1. [MicaSense Image Processing Tutorial #1](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Tutorial%201.html)
 
 ### Running this code 
