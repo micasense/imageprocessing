@@ -12,12 +12,12 @@ To do that you'll need `git` (which will come in handy later)
 
 Once you have git installed, you'll want to start with the setup tutorial to get the appropriate tools installed.
 
-[Micasense Image Processing Setup](https://micasense.github.io/tutorial/MicaSense%20Image%20Processing%20Setup.html)
+[Micasense Image Processing Setup](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Setup.html)
 
 ### Tutorial Articles 
 
-1. [MicaSense Image Processing Setup](https://micasense.github.io/tutorial/MicaSense%20Image%20Processing%20Tutorial%20Setup.html)
-1. [MicaSense Image Processing Tutorial #1](https://micasense.github.io/tutorial/MicaSense%20Image%20Processing%20Tutorial%201.html)
+1. [MicaSense Image Processing Setup](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Tutorial%20Setup.html)
+1. [MicaSense Image Processing Tutorial #1](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Tutorial%201.html)
 
 ### Running this code 
 
