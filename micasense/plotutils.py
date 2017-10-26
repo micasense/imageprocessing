@@ -37,23 +37,24 @@ def plotwithcolorbar(img, title=''):
     plt.tight_layout()
     plt.show()
 
-def subplotwithcolorbar(cols, rows, images, titles=None, fig_size=None):
+def subplotwithcolorbar(rows, cols, images, titles=None, fig_size=None):
     ''' Plot a set of images in subplots '''
-    fig, axes = plt.subplots(cols, rows, figsize=fig_size)
+    fig, axes = plt.subplots(rows, cols, figsize=fig_size)
     for i in range(cols*rows):
-        column = int(i/cols)
-        row = int(i%rows)
+        column = int(i%cols)
+        row = int(i/cols)
         if i < len(images):
-            rad = axes[column][row].imshow(images[i])
+            rad = axes[row][column].imshow(images[i])
             if titles is not None:
-                axes[column][row].set_title(titles[i])
-            divider = make_axes_locatable(axes[column][row])
+                axes[row][column].set_title(titles[i])
+            divider = make_axes_locatable(axes[row][column])
             cax = divider.append_axes("right", size="3%", pad=0.05)
             fig.colorbar(rad, cax=cax)
         else:
-            axes[column, row].axis('off')
+            axes[row, column].axis('off')
     plt.tight_layout()
     plt.show()
+    return fig, axes
 
 def colormap(cmap):
     ''' Set the defalut plotting colormap
