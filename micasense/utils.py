@@ -42,8 +42,9 @@ def raw_image_to_radiance(meta, imageRaw):
 
     # get dark current pixel values
     # get number of stored values
-    darkPixel = np.array(meta.get_item('XMP:DarkRowValue'))
-    darkLevel = darkPixel.mean()
+    black_levels = [float(val) for val in meta.get_item('EXIF:BlackLevel').split(' ')]
+    blackLevel = np.array(black_levels)
+    darkLevel = blackLevel.mean()
 
     #get exposure time & gain (gain = ISO/100)
     exposureTime = float(meta.get_item('EXIF:ExposureTime'))
