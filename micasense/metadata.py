@@ -45,7 +45,7 @@ class Metadata(object):
         except KeyError:
             print ("Item "+item+" not found")
         except IndexError:
-            print("Item {0} is length {1}, inxex {2} is outside this range.".format(
+            print("Item {0} is length {1}, index {2} is outside this range.".format(
                 item,
                 len(self.exif[item]),
                 index)
