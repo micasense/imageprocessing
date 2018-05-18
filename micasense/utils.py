@@ -124,7 +124,7 @@ def focal_length_mm(meta):
         focal_length_mm = float(meta.get_item('XMP:PerspectiveFocalLength'))
     else:
         focal_length_px = float(meta.get_item('XMP:PerspectiveFocalLength'))
-        focal_length_mm = focal_length_px / focal_plane_resolution_px_per_mm()[0]
+        focal_length_mm = focal_length_px / focal_plane_resolution_px_per_mm(meta)[0]
     return focal_length_mm
 
 
