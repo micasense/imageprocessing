@@ -1,0 +1,22 @@
+name: micasense
+channels:
+  - conda-forge
+dependencies:
+  - python=3.6
+  - opencv
+  - numpy
+  - jupyter
+  - matplotlib
+  - pysolar
+  - gdal
+  - scikit-image
+  - pytest
+  - git
+  - pandas
+  - imageio
+  - ipywidgets
+  - nb_conda
+  - pip:
+    - pyzbar
+    - mapboxgl
+    - git+https://github.com/smarnach/pyexiftool.git#egg=pyexiftoolpy
