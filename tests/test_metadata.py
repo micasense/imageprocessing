@@ -38,6 +38,12 @@ def meta_v3():
     image_path = os.path.join('data', '0001SET', '000')
     return metadata.Metadata(os.path.join(image_path, 'IMG_0002_4.tif'))
 
+@pytest.fixture()
+def meta_bad_exposure():
+    image_path = os.path.join('data', '0001SET', '000')
+    return metadata.Metadata(os.path.join(image_path, 'IMG_0003_1.tif'))
+
+
 def test_load_image_metadata(meta):
     assert meta is not None
 
@@ -127,3 +133,12 @@ def test_dls_irradiance(meta):
 
 def test_dls_pose(meta):
     assert meta.dls_pose() == pytest.approx((-3.070, -0.188, -0.013), abs=0.001)
+
+def test_good_exposure(meta):
+    assert meta.exposure() == pytest.approx(0.0004725)
+
+def test_good_exposure_v3(meta_v3):
+    assert meta_v3.exposure() == pytest.approx(0.00171)
+
+def test_bad_exposure_time(meta_bad_exposure):
+    assert meta_bad_exposure.exposure() == pytest.approx(247e-6, abs=1e-3)

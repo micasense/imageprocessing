@@ -27,6 +27,7 @@ import exiftool
 from datetime import datetime, timedelta
 import pytz
 import os
+import math
 
 class Metadata(object):
     ''' Container for Micasense image metadata'''
@@ -144,7 +145,10 @@ class Metadata(object):
         return self.get_item('XMP:RigCameraIndex')
 
     def exposure(self):
-        return self.get_item('EXIF:ExposureTime')
+        exp = self.get_item('EXIF:ExposureTime')
+        if math.fabs(exp-(1.0/6329.0)) < 0.0001:
+            exp = 0.000274
+        return exp
 
     def gain(self):
         return self.get_item('EXIF:ISOSpeed')/100.0
