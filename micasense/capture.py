@@ -156,10 +156,10 @@ class Capture(object):
             percent_diffuse = 1.0/dir_dif_ratio
             #percent_diffuse = 5e4/(img.center_wavelength**2)
             sensor_irradiance = img.dls_irradiance / self.fresnel_correction
-            # find direct irrdiance in the plane normal to the sun
-            untiltied_direct_irr = sensor_irradiance / (percent_diffuse + np.cos(self.sun_sensor_angle))
+            # find direct irradiance in the plane normal to the sun
+            untilted_direct_irr = sensor_irradiance / (percent_diffuse + np.cos(self.sun_sensor_angle))
             # compute irradiance on the ground using the solar altitude angle
-            ground_irr = untiltied_direct_irr * (percent_diffuse + np.cos (self.solar_elevation))
+            ground_irr = untilted_direct_irr * (percent_diffuse + np.sin(self.solar_elevation))
             ground_irradiances.append(ground_irr)
         return ground_irradiances
 
