@@ -115,7 +115,7 @@ def test_dls_single_file():
     file1 = os.path.join(files_dir(), 'IMG_0000_1.tif')
     cap1 = capture.Capture.from_file(file1)
     assert cap1.dls_present()
-    assert cap1.dls_irradiance()[0] == pytest.approx(1.124438, 1e-4)
+    assert cap1.dls_irradiance()[0] == pytest.approx(1.010101948, 1e-4)
     pose = cap1.dls_pose()
     assert len(pose) == 3
     assert pose[0] == pytest.approx(-3.070222992336269)
@@ -127,7 +127,7 @@ def test_dls_group():
     assert cap1.dls_present()
     irradiance = cap1.dls_irradiance()
     assert len(irradiance) == 5
-    assert irradiance[0] == pytest.approx(1.124438, 1e-4)
+    assert irradiance[0] == pytest.approx(1.010101948, 1e-4)
     pose = cap1.dls_pose()
     assert len(pose) == 3
     assert pose[0] == pytest.approx(-3.070222992336269)
