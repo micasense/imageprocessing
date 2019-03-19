@@ -48,6 +48,7 @@ class ImageSet(object):
         """
         Create and ImageSet recursively from the files in a directory
         """
+        cls.basedir = directory
         matches = []
         for root, dirnames, filenames in os.walk(directory):
             for filename in fnmatch.filter(filenames, '*.tif'):

@@ -42,15 +42,13 @@ except ImportError:
         havePysolar = True
     except ImportError:
         import pysolar.solar as pysolar
-        havePysolar = True
+        havePysolar = True 
 finally: 
     if not havePysolar:
         print("Unable to import pysolar")
 
 def fresnel(phi):
-    # Calculate fresnel effects for MicaSense DLS
     return __multilayer_transmission(phi, n=[1.000277,1.6,1.38])
-    
 
 # define functions to compute the DLS-Sun angle:
 def __fresnel_transmission(phi, n1=1.000277, n2=1.38, polarization=[.5, .5]):

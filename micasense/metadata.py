@@ -22,6 +22,8 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+# Support strings in Python 2 and 3
+from __future__ import unicode_literals
 
 import exiftool
 from datetime import datetime, timedelta
@@ -54,6 +56,14 @@ class Metadata(object):
         try:
             val = self.exif[item]
             if index is not None:
+                try:
+                    if isinstance(val, unicode):
+                        val = val.encode('ascii','ignore')
+                except NameError:
+                    #throws on python 3 where unicode is undefined
+                    pass
+                if isinstance(val,str) and len(val.split(',')) > 1:
+                    val = val.split(',')
                 val = val[index]
         except KeyError:
             #print ("Item "+item+" not found")
@@ -63,21 +73,31 @@ class Metadata(object):
                 item,
                 len(self.exif[item]),
                 index))
-
         return val
 
     def size(self, item):
         '''get the size (length) of a metadata item'''
         val = self.get_item(item)
-        return len(val)
-    
+        try:
+            if isinstance(val, unicode):
+                val = val.encode('ascii','ignore')
+        except NameError:
+            #throws on python 3 where unicode is undefined
+            pass
+        if isinstance(val,str) and len(val.split(',')) > 1:
+            val = val.split(',')
+        if val is not None:
+            return len(val)
+        else:
+            return 0
+
     def print_all(self):
         for item in self.get_all():
             print("{}: {}".format(item, self.get_item(item)))
 
     def dls_present(self):
         return self.get_item("XMP:Irradiance") is not None
-    
+
     def supports_radiometric_calibration(self):
         if(self.get_item('XMP:RadiometricCalibration')) is None:
             return False
@@ -115,14 +135,28 @@ class Metadata(object):
 
     def dls_pose(self):
         ''' get DLS pose as local earth-fixed yaw, pitch, roll in radians '''
-        yaw = float(self.get_item('XMP:Yaw')) # should be XMP.DLS.Yaw, but exiftool doesn't expose it that way
-        pitch = float(self.get_item('XMP:Pitch'))
-        roll = float(self.get_item('XMP:Roll'))
+        if self.get_item('XMP:Yaw') is not None:
+            yaw = float(self.get_item('XMP:Yaw')) # should be XMP.DLS.Yaw, but exiftool doesn't expose it that way
+            pitch = float(self.get_item('XMP:Pitch'))
+            roll = float(self.get_item('XMP:Roll'))
+        else:
+            yaw = pitch = roll = 0.0
         return yaw, pitch, roll
-    
+
     def dls_irradiance(self):
-        return float(self.get_item('XMP:SpectralIrradiance'))
-    
+        if self.get_item('XMP:SpectralIrradiance') is not None:
+            irr = float(self.get_item('XMP:SpectralIrradiance'))
+        else:
+            irr = 0.0
+        return irr
+
+    def rig_relatives(self):
+        if self.get_item('XMP:RigRelatives') is not None:
+            nelem = self.size('XMP:RigRelatives')
+            return [float(self.get_item('XMP:RigRelatives', i)) for i in range(nelem)]
+        else:
+            return None
+
     def capture_id(self):
         return self.get_item('XMP:CaptureId')
 
@@ -140,7 +174,7 @@ class Metadata(object):
 
     def band_name(self):
         return self.get_item('XMP:BandName')
-    
+
     def band_index(self):
         return self.get_item('XMP:RigCameraIndex')
 
@@ -155,7 +189,7 @@ class Metadata(object):
 
     def image_size(self):
         return self.get_item('EXIF:ImageWidth'), self.get_item('EXIF:ImageHeight')
-    
+
     def center_wavelength(self):
         return self.get_item('XMP:CentralWavelength')
 
@@ -167,6 +201,8 @@ class Metadata(object):
         return [float(self.get_item('XMP:RadiometricCalibration', i)) for i in range(nelem)]
 
     def black_level(self):
+        if self.get_item('EXIF:BlackLevel') is None:
+            return 0
         black_lvl = self.get_item('EXIF:BlackLevel').split(' ')
         total = 0.0
         num = len(black_lvl)
@@ -175,7 +211,7 @@ class Metadata(object):
         return total/float(num)
 
     def dark_pixels(self):
-        ''' get the average of the optically covered pixel values 
+        ''' get the average of the optically covered pixel values
         Note: these pixels are raw, and have not been radiometrically
               corrected. Use the black_level() method for all
               radiomentric calibrations '''
@@ -221,3 +257,57 @@ class Metadata(object):
             focal_length_px = float(self.get_item('XMP:PerspectiveFocalLength'))
             focal_length_mm = focal_length_px / self.focal_plane_resolution_px_per_mm()[0]
         return focal_length_mm
+
+    def __float_or_zero(self, str):
+        if str is not None:
+            return float(str)
+        else:
+            return 0.0
+
+    def spectral_irradiance(self):
+        return self.__float_or_zero(self.get_item('XMP:SpectralIrradiance'))
+
+    def horizontal_irradiance(self):
+        return self.__float_or_zero(self.get_item('XMP:HorizontalIrradiance'))/100.0
+
+    def scattered_irradiance(self):
+        return self.__float_or_zero(self.get_item('XMP:ScatteredIrradiance'))
+
+    def direct_irradiance(self):
+        return self.__float_or_zero(self.get_item('XMP:DirectIrradiance'))
+
+    def solar_azimuth(self):
+        return self.__float_or_zero(self.get_item('XMP:SolarAzimuth'))
+
+    def solar_elevation(self):
+        return self.__float_or_zero(self.get_item('XMP:SolarElevation'))
+
+    def estimated_direct_vector(self):
+        if self.get_item('XMP:EstimatedDirectLightVector') is not None:
+            return [self.__float_or_zero(item) for item in self.get_item('XMP:EstimatedDirectLightVector')]
+        else:
+            return None
+
+    def auto_calibration_image(self):
+        cal_tag = self.get_item('XMP:CalibrationPicture')
+        return cal_tag is not None and \
+               cal_tag == 2 and \
+               self.panel_albedo() is not None and \
+               self.panel_region() is not None and \
+               self.panel_serial() is not None
+
+    def panel_albedo(self):
+        albedo = self.get_item('XMP:Albedo')
+        if albedo is not None:
+            return self.__float_or_zero(albedo)
+        return albedo
+
+    def panel_region(self):
+        if self.get_item('XMP:ReflectArea') is not None:
+            coords = [int(item) for item in self.get_item('XMP:ReflectArea').split(',')]
+            return list(zip(coords[0::2], coords[1::2]))
+        else:
+            return None
+
+    def panel_serial(self):
+        return self.get_item('XMP:PanelSerial')

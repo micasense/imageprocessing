@@ -31,6 +31,7 @@ import pyzbar.pyzbar as pyzbar
 
 from skimage import measure
 import matplotlib.pyplot as plt
+import micasense.imageutils as imageutils
 
 class Panel(object):
 
@@ -44,28 +45,53 @@ class Panel(object):
         self.gray8b = np.zeros(img.radiance().shape, dtype='uint8')
         cv2.convertScaleAbs(img.undistorted(img.radiance()), self.gray8b, 256.0/scale, -1.0*scale*bias)
         
-        self.serial = None
-        self.qr_area = None
-        self.qr_bounds = None
-        self.panel_std = None
-        self.saturated_panel_pixels_pct = None
-        self.panel_pixels_mean = None
-        if panelCorners is not None:
-            self.__panel_bounds = np.array(panelCorners)
+        if self.image.auto_calibration_image:
+            self.__panel_type = "auto" ## panels the camera found we call auto
+            if panelCorners is not None:
+                self.__panel_bounds = np.array(panelCorners)
+            else:
+                self.__panel_bounds = np.array(self.image.panel_region)
+            self.panel_albedo = self.image.panel_albedo
+            self.serial = self.image.panel_serial
+            self.qr_area = None
+            self.qr_bounds = None
+            self.panel_std = None
+            self.saturated_panel_pixels_pct = None
+            self.panel_pixels_mean = None
+            self.panel_version = None
+            
         else:
-            self.__panel_bounds = None
+            self.__panel_type = "search" ## panels we search for we call search
+            self.serial = None
+            self.qr_area = None
+            self.qr_bounds = None
+            self.panel_std = None
+            self.saturated_panel_pixels_pct = None
+            self.panel_pixels_mean = None
+            self.panel_version = None
+            if panelCorners is not None:
+                self.__panel_bounds = np.array(panelCorners)
+            else:
+                self.__panel_bounds = None
+
+    def __expect_panel(self):
+        return self.image.band_name.upper() != 'LWIR'
 
     def __find_qr(self):
         decoded = pyzbar.decode(self.gray8b, symbols=[pyzbar.ZBarSymbol.QRCODE])
         for symbol in decoded:
-            m = re.search('RP\d{2}-(\d{7})-\D{2}', symbol.data.decode('utf-8'))
+            serial_str = symbol.data.decode('UTF-8')
+            m = re.search('RP\d{2}-(\d{7})-\D{2}', serial_str)
             if m:
-                self.serial = symbol.data
+                self.serial = serial_str
+                self.panel_version = int(self.serial[2:4])
                 self.qr_bounds = []
                 for point in symbol.polygon:
                     self.qr_bounds.append([point.x,point.y])
                 self.qr_bounds = np.asarray(self.qr_bounds, np.int32)
                 self.qr_area = cv2.contourArea(self.qr_bounds)
+                # print (symbol.polygon)
+                # print (self.qr_bounds)
                 break
 
     def __pt_in_image_bounds(self, pt):
@@ -76,42 +102,90 @@ class Panel(object):
             return False
         return True
     
+    def reflectance_from_panel_serial(self):
+        if self.__panel_type == 'auto':
+            return self.panel_albedo
+        
+        if self.serial is None:
+            self.__find_qr()
+        if self.serial is None:
+            raise ValueError("Panel serial number not found")
+        if self.panel_version >= 4:
+            min_wl = float(self.serial[-14:-10])
+            min_rf = float(self.serial[-10:-7])/1000.0
+            max_wl = float(self.serial[-7:-3])
+            max_rf = float(self.serial[-3:])/1000.0
+            c = np.polyfit([min_wl,max_wl], [min_rf,max_rf], 1)
+            p = np.poly1d(c)
+            return p(self.image.center_wavelength)
+        else:
+            return None
+
     def qr_corners(self):
+        if self.__panel_type == 'auto':
+            return None
+        
         if self.qr_bounds is None:
             self.__find_qr()
         return self.qr_bounds
 
     def panel_detected(self):
+        if self.__panel_type == 'auto':
+            return True
+        
         if self.serial is None:
             self.__find_qr()
         return self.qr_bounds is not None
 
     def panel_corners(self):
         """ get the corners of a panel region based on the qr code location 
-            There are some good algorithms to do this; we use the location of a known
-            'reference' qr code and panel region.  We find the affine transform
+            Our algorithm to do this uses a 'reference' qr code location and
+            it's associate panel region.  We find the affine transform
             between the reference qr and our qr, and apply that same transform to the
-            reference panel region to find our panel region """
+            reference panel region to find our panel region. Because of a limitation
+            of the pyzbar library, the rotation of the absolute QR code isn't known, 
+            so we then try all 4 rotations and test against a cost function which is the 
+            minimum of the standard devation divided by the mean value for the panel region"""
         if self.__panel_bounds is not None:
             return self.__panel_bounds
-        reference_panel_pts = np.asarray([[894, 469], [868, 232], [630, 258], [656, 496]], 
-                                         dtype=np.int32)
-        reference_qr_pts = np.asarray([[898, 748], [880, 567], [701, 584], [718, 762]], 
-                                      dtype=np.int32)
-        # a rotation may be necessary for *very* old first gen panels
-        #rotation = 1; reference_qr_pts = np.roll(measuredQrPts, rotation, axis=0) 
+        if self.serial is None:
+            self.__find_qr()
+        if self.serial is None: # didn't find a panel in this image
+            return None
+        
+        if self.panel_version < 3:
+            reference_panel_pts = np.asarray([[894, 469], [868, 232], [630, 258], [656, 496]], 
+                                            dtype=np.int32)
+            reference_qr_pts = np.asarray([[898, 748], [880, 567], [701, 584], [718, 762]], 
+                                        dtype=np.int32)
+        elif self.panel_version >= 3:
+            reference_panel_pts = np.asarray([[557, 350], [550, 480], [695, 480], [700, 350]], dtype=np.int32)
+            reference_qr_pts = np.asarray([[821, 324], [819, 506], [996, 509], [999, 330]], dtype=np.int32) 
 
-        src = np.asarray([tuple(row) for row in reference_qr_pts[:3]], np.float32)
-        dst = np.asarray([tuple(row) for row in self.qr_corners()[:3]], np.float32)
-        warp_matrix = cv2.getAffineTransform(src, dst)
+        bounds = []
+        costs = []
+        for rotation in range(0,4):
+            qr_points = np.roll(reference_qr_pts, rotation, axis=0)
 
-        pts = np.asarray([reference_panel_pts], 'int32')
-        panel_bounds = cv2.convexHull(cv2.transform(pts, warp_matrix), clockwise=False)
-        panel_bounds = np.squeeze(panel_bounds) # remove nested lists
-        for i, point in enumerate(panel_bounds):
-            if not self.__pt_in_image_bounds(point):
-                self.__panel_bounds = None
-        self.__panel_bounds = panel_bounds
+            src = np.asarray([tuple(row) for row in qr_points[:3]], np.float32)
+            dst = np.asarray([tuple(row) for row in self.qr_corners()[:3]], np.float32)
+            warp_matrix = cv2.getAffineTransform(src, dst)
+
+            pts = np.asarray([reference_panel_pts], 'int32')
+            panel_bounds = cv2.convexHull(cv2.transform(pts, warp_matrix), clockwise=False)
+            panel_bounds = np.squeeze(panel_bounds) # remove nested lists
+            
+            bounds_in_image = True
+            for i, point in enumerate(panel_bounds):
+                if not self.__pt_in_image_bounds(point):
+                    bounds_in_image = False
+            if bounds_in_image:
+                mean, std, _, _ = self.region_stats(self.image.raw(),panel_bounds, sat_threshold=65000)
+                bounds.append(panel_bounds)
+                costs.append(std/mean)
+
+        idx = costs.index(min(costs))
+        self.__panel_bounds = bounds[idx]
         return self.__panel_bounds
 
     def region_stats(self, img, region, sat_threshold=None):
@@ -149,9 +223,7 @@ class Panel(object):
     def reflectance_mean(self):
         reflectance_image = self.image.reflectance()
         if reflectance_image is None:
-            print("First calculate the reflectance image by providing a\n band specific irradiance to the calling image.reflectance(irradnace)")
-        undistorted_refl = self.image.undistorted(reflectance_image)
-
+            print("First calculate the reflectance image by providing a\n band specific irradiance to the calling image.reflectance(irradiance)")
         mean, _, _, _ = self.region_stats(reflectance_image,
                                           self.panel_corners())
         return mean
@@ -163,14 +235,19 @@ class Panel(object):
     def plot_image(self):
         display_img = cv2.cvtColor(self.gray8b,cv2.COLOR_GRAY2RGB)
         if self.panel_detected():
-            cv2.drawContours(display_img,[self.qr_corners()], 0, (255, 0, 0), 3)
-        cv2.drawContours(display_img,[self.panel_corners()], 0, (0,0, 255), 3)
+            if self.qr_corners() is not None:
+                cv2.drawContours(display_img,[self.qr_corners()], 0, (255, 0, 0), 3)
+            cv2.drawContours(display_img,[self.panel_corners()], 0, (0,0, 255), 3)
 
         font = cv2.FONT_HERSHEY_DUPLEX
         if self.panel_detected():
-            xloc = self.qr_corners()[0][0]-100
-            yloc = self.qr_corners()[0][1]+100
-            cv2.putText(display_img, str(self.serial), (xloc,yloc), font, 1, 255, 2)
+            if self.qr_corners() is not None:
+                xloc = self.qr_corners()[0][0]-100
+                yloc = self.qr_corners()[0][1]+100
+            else:
+                xloc = self.panel_corners()[0][0]-100
+                yloc = self.panel_corners()[0][1]+100
+            cv2.putText(display_img, str(self.serial).split('_')[0], (xloc,yloc), font, 1, 255, 2)
         return display_img
 
     def plot(self, figsize=(14,14)):

@@ -47,7 +47,7 @@ def test_qr_corners():
     good_qr_corners = [[460, 599], [583, 599], [584, 478], [462, 477]]
     assert qr_corners is not None
     assert len(qr_corners) == len(good_qr_corners)
-    assert pan.serial == b"RP02-1603036-SC"
+    assert pan.serial == 'RP02-1603036-SC'
     for i, pt in enumerate(qr_corners):
         # different opencv/zbar versions round differently it seems
         assert pt[0] == pytest.approx(good_qr_corners[i][0], abs=3)
@@ -60,7 +60,7 @@ def test_panel_corners():
     good_pts = [[809, 613], [648, 615], [646, 454], [808, 452]]
     assert panel_pts is not None
     assert len(panel_pts) == len(good_pts)
-    assert pan.serial == b"RP02-1603036-SC"
+    assert pan.serial == 'RP02-1603036-SC'
     for i, pt in enumerate(panel_pts):
         # different opencv/zbar versions round differently it seems
         assert pt[0] == pytest.approx(good_pts[i][0], abs=3)
