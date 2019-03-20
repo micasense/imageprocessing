@@ -329,16 +329,17 @@ class Capture(object):
         return [w/w[2,2] for w in warp_matrices]
 
 
-    def save_capture_as_reflectance_stack(self, outfilename, irradiance_list=None, normalize = False):
+    def save_capture_as_reflectance_stack(self, outfilename, irradiance_list=None, warp_matrices=None, normalize = False):
         from osgeo.gdal import GetDriverByName, GDT_UInt16
         self.compute_reflectance(irradiance_list)
-        warp_matrices = self.get_warp_matrices()
+        if warp_matrices is None:
+            warp_matrices = self.get_warp_matrices()
         cropped_dimensions,edges = imageutils.find_crop_bounds(self,warp_matrices)
         im_aligned = imageutils.aligned_capture(self, warp_matrices, cv2.MOTION_HOMOGRAPHY, cropped_dimensions, None, img_type="reflectance")
 
         rows, cols, bands = im_aligned.shape
         driver = GetDriverByName('GTiff')
-        outRaster = driver.Create(outfilename, cols, rows, 6, GDT_UInt16)
+        outRaster = driver.Create(outfilename, cols, rows, bands, GDT_UInt16)
         if outRaster is None:
             raise IOError("could not load gdal GeoTiff driver")
         for i in range(0,5):
@@ -349,9 +350,9 @@ class Capture(object):
             outband.WriteArray(outdata*32768)
             outband.FlushCache()
 
-        if im_aligned.shape[2] == 6:
+        if bands == 6:
             outband = outRaster.GetRasterBand(6)
-            outdata = (im_aligned[:,:,5]+273.15) * 100 # scale to back to centi-k to fit into uint16
+            outdata = (im_aligned[:,:,5]+273.15) * 100 # scale data from float degC to back to centi-Kelvin to fit into uint16
             outdata[outdata<0] = 0
             outdata[outdata>65535] = 65535
             outband.WriteArray(outdata)
