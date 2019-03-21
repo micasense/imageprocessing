@@ -7,10 +7,10 @@ dependencies:
   - numpy
   - jupyter
   - matplotlib
-  - pysolar
+  - pysolar=0.6
   - gdal
   - scikit-image
-  - pytest
+  - pytest=3.6.0
   - git
   - pandas
   - imageio
