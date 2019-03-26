@@ -16,6 +16,7 @@ dependencies:
   - imageio
   - ipywidgets
   - nb_conda
+  - requests
   - pip:
     - pyzbar
     - mapboxgl

@@ -302,7 +302,7 @@ class Capture(object):
             if p.panel_detected():
                 self.detected_panel_count += 1
         # is panelCorners are defined by hand
-        if self.panelCorners is not None:
+        if self.panelCorners is not None and all(corner is not None for corner in self.panelCorners):
            self.detected_panel_count = len(self.panelCorners)
         return self.detected_panel_count
 
