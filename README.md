@@ -22,6 +22,8 @@ Once you have git installed and the repository cloned, you are ready to start wi
 1. [Capture Class Examples](https://micasense.github.io/imageprocessing/Captures.html)
 1. [ImageSet Examples](https://micasense.github.io/imageprocessing/ImageSets.html)
 1. [Capture Alignment and Analysis Examples](https://micasense.github.io/imageprocessing/Alignment.html)
+1. [Capture Alignment Using Rig Relatives](https://micasense.github.io/imageprocessing/Alignment-RigRelatives.html)
+1. [Batch processing into stacked TIFFs](https://micasense.github.io/imageprocessing/Batch%20Processing.html)
 
 
 ### MicaSense Library Usage
@@ -42,9 +44,11 @@ That command should open a web browser window showing the set of files and folde
 
 Second, a set of helper utilities is available in the `micasense` folder that can be used both with these tutorials as well as separtely. 
 
+Note that some of the hyperlinks in the notebooks may give you a 404 Not Found error. This is because the links are setup to allow the list of files above to be accessed on the github.io site.  When running the notebooks, use your jupyter "home" tab to open different notebooks.
+
 ### Contribution guidelines
 
-Find a problem with the tutorial? Please create an issue on github. 
+Find a problem with the tutorial? Please look through the existing issues (open and closed) and if it's new, create an issue on github. 
 
 Want to correct an issue or expand library functionality?  Fork the repository, make your fix, and submit a pull request on github.
 

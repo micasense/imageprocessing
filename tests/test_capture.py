@@ -38,6 +38,10 @@ def file_list():
     return glob.glob(os.path.join(files_dir(), 'IMG_0000_*.tif'))
 
 @pytest.fixture()
+def non_panel_rededge_file_list():
+    return glob.glob(os.path.join(files_dir(), 'IMG_0001_*.tif'))
+
+@pytest.fixture()
 def bad_file_list():
     file1 = os.path.join(files_dir(), 'IMG_0000_1.tif')
     file2 = os.path.join(files_dir(), 'IMG_0001_1.tif')
@@ -167,3 +171,13 @@ def test_panel_irradiance():
     assert len(rad) == len(expected_rad)
     for i,_ in enumerate(expected_rad):
         assert rad[i] == pytest.approx(expected_rad[i], rel=0.001)
+
+def test_detect_panels_in_panel_image():
+    cap = capture.Capture.from_filelist(file_list())
+    assert cap.detect_panels() == 5
+    assert cap.panels_in_all_expected_images() == True
+
+def test_no_detect_panels_in_flight_image():
+    cap = capture.Capture.from_filelist(non_panel_rededge_file_list())
+    assert cap.detect_panels() == 0
+    assert cap.panels_in_all_expected_images() == False
