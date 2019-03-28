@@ -36,6 +36,32 @@ def img():
     image_path = os.path.join('data','0000SET','000',)
     return image.Image(os.path.join(image_path,'IMG_0000_1.tif'))
 
+# pysolar changed their coordinate system from South-based to north-based between 0.6 and 0.8
+# we add some tests here to make sure we captured that change properly
+def test_pysolar_north():
+    assert dls.ned_from_pysolar(0,np.radians(45)) == pytest.approx([0.707, 0, -0.707], 0.01)
+
+def test_pysolar_northeast():
+    assert dls.ned_from_pysolar(np.radians(45),np.radians(45)) == pytest.approx([0.50, 0.5, -0.707], 0.01)
+
+def test_pysolar_east():
+    assert dls.ned_from_pysolar(np.radians(90),np.radians(45)) == pytest.approx([0, 0.707, -0.707], 0.01)
+
+def test_pysolar_southeast():
+    assert dls.ned_from_pysolar(np.radians(135),np.radians(45)) == pytest.approx([-0.50, 0.5, -0.707], 0.01)
+
+def test_pysolar_south():
+    assert dls.ned_from_pysolar(np.radians(180),np.radians(45)) == pytest.approx([-0.707, 0, -0.707], 0.01)
+
+def test_pysolar_southwest():
+    assert dls.ned_from_pysolar(np.radians(225),np.radians(45)) == pytest.approx([-0.50, -0.5, -0.707], 0.01)
+
+def test_pysolar_west():
+    assert dls.ned_from_pysolar(np.radians(270),np.radians(45)) == pytest.approx([0,-0.707,-0.707], 0.01)
+
+def test_pysolar_northwest():
+    assert dls.ned_from_pysolar(np.radians(315),np.radians(45)) == pytest.approx([0.50, -0.5, -0.707], 0.01)
+
 def test_sun_angle(img):
     if dls.havePysolar:
         sun_angle = dls.compute_sun_angle((img.latitude, img.longitude, img.altitude),
@@ -46,7 +72,7 @@ def test_sun_angle(img):
         assert sun_angle[1] == pytest.approx([-1.87482468e-01,  1.82720334e-05, -9.82267949e-01], abs=0.001)
         assert sun_angle[2] == pytest.approx(0.6754, abs=0.001)
         assert sun_angle[3] == pytest.approx(0.7193, abs=0.001)
-        assert sun_angle[4] == pytest.approx(-0.334, abs=0.001)
+        assert sun_angle[4] == pytest.approx(3.4756, abs=0.001)
     else:
         assert True
 

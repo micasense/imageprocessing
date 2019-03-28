@@ -33,6 +33,7 @@ import numpy as np
 import imp
 
 havePysolar = False
+
 try:
     import pysolar.solar as pysolar
     havePysolar = True
@@ -85,7 +86,7 @@ def __multilayer_transmission(phi, n, polarization=[.5, .5]):
 def ned_from_pysolar(sunAzimuth, sunAltitude):
     """Convert pysolar coordinates to NED coordinates."""
     elements = (
-        -np.cos(sunAzimuth) * np.cos(sunAltitude),
+        np.cos(sunAzimuth) * np.cos(sunAltitude),
         np.sin(sunAzimuth) * np.cos(sunAltitude),
         -np.sin(sunAltitude),
     )
@@ -136,7 +137,7 @@ def compute_sun_angle(
             azimuth = pysolar.get_azimuth(position[0], position[1], utc_datetime)
         except AttributeError: # catch 0.6 version of pysolar required for python 2.7 support
             altitude = pysolar.GetAltitude(position[0], position[1], utc_datetime)
-            azimuth = pysolar.GetAzimuth(position[0], position[1], utc_datetime)
+            azimuth = 180.0+pysolar.GetAzimuth(position[0], position[1], utc_datetime)
         sunAltitude = np.radians(np.array(altitude))
         sunAzimuth = np.radians(np.array(azimuth))
         nSun = ned_from_pysolar(sunAzimuth, sunAltitude)

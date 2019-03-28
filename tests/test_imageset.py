@@ -40,24 +40,24 @@ def progress(p):
     global progress_val
     progress_val = p
     
-def test_from_captures():
-    file1 = os.path.join(files_dir(), 'IMG_0000_1.tif')
-    file2 = os.path.join(files_dir(), 'IMG_0001_1.tif')
+def test_from_captures(files_dir):
+    file1 = os.path.join(files_dir, 'IMG_0000_1.tif')
+    file2 = os.path.join(files_dir, 'IMG_0001_1.tif')
     cap1 = capture.Capture.from_file(file1)
     cap2 = capture.Capture.from_file(file2)
     imgset = imageset.ImageSet([cap1,cap2])
     assert imgset.captures is not None
 
-def test_from_directory():
+def test_from_directory(files_dir):
     global progress_val
     progress(0.0)
-    imgset = imageset.ImageSet.from_directory(files_dir(), progress)
+    imgset = imageset.ImageSet.from_directory(files_dir, progress)
     assert imgset is not None
     assert progress_val == 1.0
     assert len(imgset.captures) == 2
 
-def test_as_nested_lists():
-    imgset = imageset.ImageSet.from_directory(files_dir())
+def test_as_nested_lists(files_dir):
+    imgset = imageset.ImageSet.from_directory(files_dir)
     assert imgset is not None
     data, columns = imgset.as_nested_lists()
     assert data[0][1] == 36.576096
