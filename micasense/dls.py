@@ -137,9 +137,10 @@ def compute_sun_angle(
             azimuth = pysolar.get_azimuth(position[0], position[1], utc_datetime)
         except AttributeError: # catch 0.6 version of pysolar required for python 2.7 support
             altitude = pysolar.GetAltitude(position[0], position[1], utc_datetime)
-            azimuth = 180.0+pysolar.GetAzimuth(position[0], position[1], utc_datetime)
+            azimuth = 180-pysolar.GetAzimuth(position[0], position[1], utc_datetime)
         sunAltitude = np.radians(np.array(altitude))
         sunAzimuth = np.radians(np.array(azimuth))
+        sunAzimuth = sunAzimuth % (2 * np.pi ) #wrap range 0 to 2*pi
         nSun = ned_from_pysolar(sunAzimuth, sunAltitude)
         nSensor = np.array(get_orientation(pose, sensor_orientation))
         angle = np.arccos(np.dot(nSun, nSensor))

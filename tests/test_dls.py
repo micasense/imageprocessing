@@ -27,6 +27,7 @@ import pytest
 import os, glob
 import numpy as np
 import math
+import datetime
 
 import micasense.dls as dls
 import micasense.image as image
@@ -61,6 +62,18 @@ def test_pysolar_west():
 
 def test_pysolar_northwest():
     assert dls.ned_from_pysolar(np.radians(315),np.radians(45)) == pytest.approx([0.50, -0.5, -0.707], 0.01)
+
+def test_pysolar():
+    lat = 47.6
+    lon = -122.3
+    dt = datetime.datetime(2019,3,21,20,15,0,tzinfo=datetime.timezone.utc)
+    _,_,angle,sunAltitude,sunAzimuth = dls.compute_sun_angle((lat, lon, 0),
+                                      (0,0,0),
+                                      dt,
+                                      np.array([0,0,-1]))
+    assert angle == pytest.approx(math.radians(lat), abs=0.01)
+    assert sunAltitude == pytest.approx(math.radians(90-lat), abs=0.01)
+    assert sunAzimuth == pytest.approx(math.pi, abs=0.01)
 
 def test_sun_angle(img):
     if dls.havePysolar:
