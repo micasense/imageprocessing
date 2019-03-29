@@ -112,7 +112,8 @@ def align(pair):
 
     nol =  int(w / (1280/3)) - 1
 
-    print("number of pyramid levels: {}".format(nol))
+    if pair['debug']:
+        print("number of pyramid levels: {}".format(nol))
 
     warp_matrix[0][2] /= (2**nol)
     warp_matrix[1][2] /= (2**nol)
@@ -199,10 +200,15 @@ def align_capture(capture, ref_index=0, warp_mode=cv2.MOTION_HOMOGRAPHY, max_ite
 
     warp_matrices = [None]*len(alignment_pairs)
 
+    #required to work across linux/mac/windows, see https://stackoverflow.com/questions/47852237
+    if multithreaded and multiprocessing.get_start_method() != 'spawn':
+        try:
+            
+            multiprocessing.set_start_method('spawn',force=True)
+        except ValueError:
+            multithreaded = False
+
     if(multithreaded):
-        #required to work across linux/mac/windows, see https://stackoverflow.com/questions/47852237
-        if multiprocessing.get_start_method() != 'spawn':
-            multiprocessing.set_start_method('spawn')
         pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
         for _,mat in enumerate(pool.imap_unordered(align, alignment_pairs)):
             warp_matrices[mat['match_index']] = mat['warp_matrix']

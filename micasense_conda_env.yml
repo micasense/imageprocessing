@@ -2,19 +2,18 @@ name: micasense
 channels:
   - conda-forge
 dependencies:
-  - python=3.6
+  - python=3
   - opencv
   - numpy
   - jupyter
   - matplotlib
-  - pysolar=0.6
+  - pysolar
   - gdal
   - scikit-image
-  - pytest=3.6.0
+  - pytest
   - git
   - pandas
   - imageio
-  - ipywidgets
   - nb_conda
   - requests
   - pip:

@@ -130,6 +130,9 @@ class Panel(object):
         return self.qr_bounds
 
     def panel_detected(self):
+        if self.__expect_panel() == False:
+            return False
+        
         if self.__panel_type == 'auto':
             return True
         

@@ -41,6 +41,34 @@ def img2():
     image_path = os.path.join('data','0000SET','000',)
     return image.Image(os.path.join(image_path,'IMG_0000_2.tif'))
 
+@pytest.fixture()
+def altum_files_dir():
+    return os.path.join('data', 'ALTUM1SET', '000')
+
+@pytest.fixture()
+def panel_altum_file_name(altum_files_dir):
+    return os.path.join(altum_files_dir, 'IMG_0000_1.tif')
+
+@pytest.fixture()
+def panel_altum_image(panel_altum_file_name):
+    return image.Image(panel_altum_file_name)
+
+@pytest.fixture()
+def non_panel_altum_file_name(altum_files_dir):
+    return os.path.join(altum_files_dir, 'IMG_0008_1.tif')
+
+@pytest.fixture()
+def non_panel_altum_image(non_panel_altum_file_name):
+    return image.Image(non_panel_altum_file_name)
+
+@pytest.fixture()
+def non_existant_file_name(altum_files_dir):
+    return os.path.join(altum_files_dir, 'NOFILE.tif')
+
+@pytest.fixture()
+def altum_lwir_image(altum_files_dir):
+    return image.Image(os.path.join(altum_files_dir, 'IMG_0000_6.tif'))
+
 def test_load_image_metadata(img):
     assert img.meta is not None
     assert img.meta.band_index() == 0
@@ -94,3 +122,23 @@ def test_cv2_camera_matrix(img):
                 [   0.0,    0.0,   1.0]]
     for idx, row in enumerate(img.cv2_camera_matrix()):
         assert row == pytest.approx(test_mat[idx], abs=0.1)
+
+def test_altum_panel_image(panel_altum_image):
+    assert panel_altum_image.size() == (2064, 1544)
+    assert panel_altum_image.meta.camera_make() == "MicaSense"
+    assert panel_altum_image.meta.camera_model() == "Altum"
+    assert panel_altum_image.auto_calibration_image == True
+
+def test_altum_flight_image(non_panel_altum_image):
+    assert non_panel_altum_image.meta.camera_make() == "MicaSense"
+    assert non_panel_altum_image.meta.camera_model() == "Altum"
+    assert non_panel_altum_image.auto_calibration_image == False
+
+def test_image_not_file(non_existant_file_name):
+    with pytest.raises(OSError):
+        image.Image(non_existant_file_name)
+
+def test_altum_lwir_image(altum_lwir_image):
+    assert altum_lwir_image.meta.band_name() == 'LWIR'
+    assert altum_lwir_image.size() == (160,120)
+    assert altum_lwir_image.auto_calibration_image == False
