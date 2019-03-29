@@ -39,6 +39,15 @@ def flight_image_name():
     image_path = os.path.join('data', '0000SET', '000')
     return os.path.join(image_path, 'IMG_0001_1.tif')
 
+@pytest.fixture()
+def altum_panel_image_name():
+    image_path = os.path.join('data', 'ALTUM1SET', '000')
+    return os.path.join(image_path, 'IMG_0000_1.tif')
+
+@pytest.fixture()
+def altum_lwir_image_name():
+    image_path = os.path.join('data', 'ALTUM1SET', '000')
+    return os.path.join(image_path, 'IMG_0000_6.tif')
 
 def test_qr_corners(panel_image_name):
     img = image.Image(panel_image_name)
@@ -127,5 +136,27 @@ def test_panel_detected(panel_image_name):
 
 def test_panel_not_detected(flight_image_name):
     img = image.Image(flight_image_name)
+    pan = panel.Panel(img)
+    assert pan.panel_detected() == False
+
+def test_altum_panel(altum_panel_image_name):
+    img = image.Image(altum_panel_image_name)
+    assert img.auto_calibration_image == True
+    pan = panel.Panel(img)
+    panel_pts = pan.panel_corners()
+    good_pts = [[1278, 483], [1176, 491], [1184, 591], [1286, 583]]
+    assert panel_pts is not None
+    assert len(panel_pts) == len(good_pts)
+    assert pan.serial == 'RP04-1901231-SC'
+    print(panel_pts)
+    for i, pt in enumerate(panel_pts):
+        # different opencv/zbar versions round differently it seems
+        assert pt[0] == pytest.approx(good_pts[i][0], abs=3)
+        assert pt[1] == pytest.approx(good_pts[i][1], abs=3)
+    assert pan.qr_corners() == None
+
+def test_altum_lwir(altum_lwir_image_name):
+    img = image.Image(altum_lwir_image_name)
+    assert img.auto_calibration_image == False
     pan = panel.Panel(img)
     assert pan.panel_detected() == False

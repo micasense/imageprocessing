@@ -34,6 +34,10 @@ def files_dir():
     return os.path.join('data', '0000SET', '000')
 
 @pytest.fixture()
+def altum_files_dir():
+    return os.path.join('data', 'ALTUM1SET', '000')
+
+@pytest.fixture()
 def file_list(files_dir):
     return glob.glob(os.path.join(files_dir, 'IMG_0000_*.tif'))
 
@@ -47,6 +51,24 @@ def bad_file_list(files_dir):
     file2 = os.path.join(files_dir, 'IMG_0001_1.tif')
     return [file1, file2]
 
+@pytest.fixture()
+def panel_altum_file_list(altum_files_dir):
+    return glob.glob(os.path.join(altum_files_dir, 'IMG_0000_*.tif'))
+
+@pytest.fixture()
+def panel_altum_capture(panel_altum_file_list):
+    imgs = [image.Image(fle) for fle in panel_altum_file_list]
+    return capture.Capture(imgs)
+
+@pytest.fixture()
+def non_panel_altum_file_list(altum_files_dir):
+    return glob.glob(os.path.join(altum_files_dir, 'IMG_0008_*.tif'))
+
+@pytest.fixture()
+def non_panel_altum_capture(non_panel_altum_file_list):
+    imgs = [image.Image(fle) for fle in non_panel_altum_file_list]
+    return capture.Capture(imgs)
+    
 def test_from_images(file_list):
     imgs = [image.Image(fle) for fle in file_list]
     cap = capture.Capture(imgs)
@@ -181,3 +203,27 @@ def test_no_detect_panels_in_flight_image(non_panel_rededge_file_list):
     cap = capture.Capture.from_filelist(non_panel_rededge_file_list)
     assert cap.detect_panels() == 0
     assert cap.panels_in_all_expected_images() == False
+
+def test_altum_images(non_panel_altum_file_list):
+    imgs = [image.Image(fle) for fle in non_panel_altum_file_list]
+    cap = capture.Capture(imgs)
+    assert cap is not None
+    assert len(cap.images) == len(non_panel_altum_file_list)
+
+def test_altum_from_filelist(non_panel_altum_file_list):
+    cap = capture.Capture.from_filelist(non_panel_altum_file_list)
+    assert cap is not None
+    assert len(cap.images) == len(non_panel_altum_file_list)
+
+def test_altum_from_single_file(altum_files_dir):
+    file1 = os.path.join(altum_files_dir, 'IMG_0008_6.tif')
+    cap = capture.Capture.from_file(file1)
+    assert cap is not None
+
+def test_altum_horizontal_irradiance(non_panel_altum_capture):
+    assert non_panel_altum_capture.dls_present()
+    good_irradiance = [1.222, 1.079, 0.914, 0.587, 0.715, 0.0]
+    assert non_panel_altum_capture.dls_irradiance() == pytest.approx(good_irradiance, 1e-3)
+
+def test_altum_panels(panel_altum_capture):
+    assert panel_altum_capture.panels_in_all_expected_images() == True
