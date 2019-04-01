@@ -29,46 +29,6 @@ import os, glob
 import micasense.capture as capture
 import micasense.image as image
 
-@pytest.fixture()
-def files_dir():
-    return os.path.join('data', '0000SET', '000')
-
-@pytest.fixture()
-def altum_files_dir():
-    return os.path.join('data', 'ALTUM1SET', '000')
-
-@pytest.fixture()
-def file_list(files_dir):
-    return glob.glob(os.path.join(files_dir, 'IMG_0000_*.tif'))
-
-@pytest.fixture()
-def non_panel_rededge_file_list(files_dir):
-    return glob.glob(os.path.join(files_dir, 'IMG_0001_*.tif'))
-
-@pytest.fixture()
-def bad_file_list(files_dir):
-    file1 = os.path.join(files_dir, 'IMG_0000_1.tif')
-    file2 = os.path.join(files_dir, 'IMG_0001_1.tif')
-    return [file1, file2]
-
-@pytest.fixture()
-def panel_altum_file_list(altum_files_dir):
-    return glob.glob(os.path.join(altum_files_dir, 'IMG_0000_*.tif'))
-
-@pytest.fixture()
-def panel_altum_capture(panel_altum_file_list):
-    imgs = [image.Image(fle) for fle in panel_altum_file_list]
-    return capture.Capture(imgs)
-
-@pytest.fixture()
-def non_panel_altum_file_list(altum_files_dir):
-    return glob.glob(os.path.join(altum_files_dir, 'IMG_0008_*.tif'))
-
-@pytest.fixture()
-def non_panel_altum_capture(non_panel_altum_file_list):
-    imgs = [image.Image(fle) for fle in non_panel_altum_file_list]
-    return capture.Capture(imgs)
-    
 def test_from_images(file_list):
     imgs = [image.Image(fle) for fle in file_list]
     cap = capture.Capture(imgs)
@@ -80,9 +40,8 @@ def test_from_filelist(file_list):
     assert cap is not None
     assert len(cap.images) == len(file_list)
 
-def test_from_single_file(files_dir):
-    file1 = os.path.join(files_dir, 'IMG_0000_1.tif')
-    cap = capture.Capture.from_file(file1)
+def test_from_single_file(panel_image_name):
+    cap = capture.Capture.from_file(panel_image_name)
     assert cap is not None
 
 def test_from_different_ids(bad_file_list):
@@ -104,42 +63,33 @@ def test_append_list(file_list):
     cap.append_images(imgs[1:])
     assert len(cap.images) == 5
 
-def test_less_than(files_dir):
-    file1 = os.path.join(files_dir, 'IMG_0000_1.tif')
-    file2 = os.path.join(files_dir, 'IMG_0001_1.tif')
-    cap1 = capture.Capture.from_file(file1)
-    cap2 = capture.Capture.from_file(file2)
+def test_less_than(panel_image_name, flight_image_name):
+    cap1 = capture.Capture.from_file(panel_image_name)
+    cap2 = capture.Capture.from_file(flight_image_name)
     assert cap1 < cap2
 
-def test_greater_than(files_dir):
-    file1 = os.path.join(files_dir, 'IMG_0000_1.tif')
-    file2 = os.path.join(files_dir, 'IMG_0001_1.tif')
-    cap1 = capture.Capture.from_file(file1)
-    cap2 = capture.Capture.from_file(file2)
+def test_greater_than(panel_image_name, flight_image_name):
+    cap1 = capture.Capture.from_file(panel_image_name)
+    cap2 = capture.Capture.from_file(flight_image_name)
     assert cap2 > cap1
 
-def test_equal(files_dir):
-    file1 = os.path.join(files_dir, 'IMG_0000_1.tif')
-    file2 = os.path.join(files_dir, 'IMG_0000_3.tif')
-    cap1 = capture.Capture.from_file(file1)
-    cap2 = capture.Capture.from_file(file2)
+def test_equal(panel_image_name, panel_image_name_red):
+    cap1 = capture.Capture.from_file(panel_image_name)
+    cap2 = capture.Capture.from_file(panel_image_name_red)
     assert cap2 == cap1
 
-def test_uct_time(files_dir):
-    file1 = os.path.join(files_dir, 'IMG_0000_1.tif')
-    cap1 = capture.Capture.from_file(file1)
+def test_uct_time(panel_image_name):
+    cap1 = capture.Capture.from_file(panel_image_name)
     assert cap1.utc_time().isoformat() == '2017-10-19T20:40:39.200174+00:00'
 
-def test_location(files_dir):
-    file1 = os.path.join(files_dir, 'IMG_0000_1.tif')
-    cap1 = capture.Capture.from_file(file1)
+def test_location(panel_image_name):
+    cap1 = capture.Capture.from_file(panel_image_name)
     loc = cap1.location()
     assert len(loc) == 3
     assert loc == (36.576096, -119.4352689, 101.861)
 
-def test_dls_single_file(files_dir):
-    file1 = os.path.join(files_dir, 'IMG_0000_1.tif')
-    cap1 = capture.Capture.from_file(file1)
+def test_dls_single_file(panel_image_name):
+    cap1 = capture.Capture.from_file(panel_image_name)
     assert cap1.dls_present()
     assert cap1.dls_irradiance()[0] == pytest.approx(1.0101948, 1e-4)
     pose = cap1.dls_pose()
@@ -215,9 +165,8 @@ def test_altum_from_filelist(non_panel_altum_file_list):
     assert cap is not None
     assert len(cap.images) == len(non_panel_altum_file_list)
 
-def test_altum_from_single_file(altum_files_dir):
-    file1 = os.path.join(altum_files_dir, 'IMG_0008_6.tif')
-    cap = capture.Capture.from_file(file1)
+def test_altum_from_single_file(altum_flight_image_name):
+    cap = capture.Capture.from_file(altum_flight_image_name)
     assert cap is not None
 
 def test_altum_horizontal_irradiance(non_panel_altum_capture):

@@ -32,11 +32,6 @@ import datetime
 import micasense.dls as dls
 import micasense.image as image
 
-@pytest.fixture()
-def img():
-    image_path = os.path.join('data','0000SET','000',)
-    return image.Image(os.path.join(image_path,'IMG_0000_1.tif'))
-
 # pysolar changed their coordinate system from South-based to north-based between 0.6 and 0.8
 # we add some tests here to help ensure we captured that change properly
 def test_ned_from_pysolar_north():
