@@ -33,8 +33,10 @@ import math
 
 class Metadata(object):
     ''' Container for Micasense image metadata'''
-    def __init__(self, filename, exiftoolPath=None):
-        self.xmpfile = None
+    def __init__(self, filename, exiftoolPath=None, exiftool_obj=None):
+        if exiftool_obj is not None:
+            self.exif = exiftool_obj.get_metadata(filename)
+            return
         if exiftoolPath is not None:
             self.exiftoolPath = exiftoolPath
         elif os.environ.get('exiftoolpath') is not None:
