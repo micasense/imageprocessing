@@ -44,6 +44,12 @@ def test_from_single_file(panel_image_name):
     cap = capture.Capture.from_file(panel_image_name)
     assert cap is not None
 
+def test_append_single_file(file_list):
+    cap = capture.Capture.from_file(file_list[0])
+    assert len(cap.images) == 1
+    cap.append_file(file_list[1])
+    assert len(cap.images) == 2
+
 def test_from_different_ids(bad_file_list):
     with pytest.raises(RuntimeError):
         cap = capture.Capture.from_filelist(bad_file_list)
@@ -176,3 +182,10 @@ def test_altum_horizontal_irradiance(non_panel_altum_capture):
 
 def test_altum_panels(panel_altum_capture):
     assert panel_altum_capture.panels_in_all_expected_images() == True
+
+def test_stack_export(non_panel_altum_capture, tmpdir):
+    pathstr = str(tmpdir.join('test_bgrent.tiff'))
+    non_panel_altum_capture.save_capture_as_stack(pathstr)
+    assert os.path.exists(pathstr)
+    if tmpdir.check(): 
+        tmpdir.remove()

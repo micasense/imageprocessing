@@ -404,4 +404,4 @@ class Image(object):
         B[:,2]=B[:,2]-B[:,3]
         B = B[0:3,0:3]
         B = B/B[2,2]
-        return np.matrix(B)
+        return np.array(B)

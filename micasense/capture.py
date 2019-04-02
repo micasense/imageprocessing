@@ -84,6 +84,9 @@ class Capture(object):
     def append_images(self, images):
         [self.append_image(img) for img in images]
 
+    def append_file(self, file_name):
+        self.append_image(image.Image(file_name))
+    
     @classmethod
     def from_file(cls, file_name):
         return cls(image.Image(file_name))
@@ -213,12 +216,23 @@ class Capture(object):
     def compute_radiance(self):
         [img.radiance() for img in self.images]
 
+    def compute_undistorted_radiance(self):
+        [img.undistorted_radiance() for img in self.images]
+
     def compute_reflectance(self, irradiance_list=None, force_recompute=True):
         '''Compute image reflectance from irradiance list, but don't return'''
         if irradiance_list is not None:
             [img.reflectance(irradiance_list[i], force_recompute=force_recompute) for i,img in enumerate(self.images)]
         else:
             [img.reflectance(force_recompute=force_recompute) for img in self.images]
+
+    def compute_undistorted_reflectance(self, irradiance_list=None, force_recompute=True):
+        '''Compute image reflectance from irradiance list, but don't return'''
+        if irradiance_list is not None:
+            [img.undistorted_reflectance(irradiance_list[i], force_recompute=force_recompute) for i,img in enumerate(self.images)]
+        else:
+            [img.undistorted_reflectance(force_recompute=force_recompute) for img in self.images]
+
 
     def eo_images(self):
         return [img for img in self.images if img.band_name != 'LWIR']
@@ -329,13 +343,25 @@ class Capture(object):
         return [w/w[2,2] for w in warp_matrices]
 
 
-    def save_capture_as_reflectance_stack(self, outfilename, irradiance_list=None, warp_matrices=None, normalize = False):
+    def save_capture_as_stack(self, outfilename, irradiance_list=None, warp_matrices=None, normalize = False):
         from osgeo.gdal import GetDriverByName, GDT_UInt16
-        self.compute_reflectance(irradiance_list)
+        if irradiance_list is None and self.dls_irradiance() is None:
+            self.compute_undistorted_radiance()
+            img_type = 'radiance'
+        else:
+            if irradiance_list is None:
+                irradiance_list = self.dls_irradiance()+[0]
+            self.compute_undistorted_reflectance(irradiance_list)
+            img_type = 'reflectance'
         if warp_matrices is None:
             warp_matrices = self.get_warp_matrices()
         cropped_dimensions,edges = imageutils.find_crop_bounds(self,warp_matrices)
-        im_aligned = imageutils.aligned_capture(self, warp_matrices, cv2.MOTION_HOMOGRAPHY, cropped_dimensions, None, img_type="reflectance")
+        im_aligned = imageutils.aligned_capture(self, 
+                                                warp_matrices, 
+                                                cv2.MOTION_HOMOGRAPHY, 
+                                                cropped_dimensions, 
+                                                None, 
+                                                img_type=img_type)
 
         rows, cols, bands = im_aligned.shape
         driver = GetDriverByName('GTiff')
@@ -346,8 +372,8 @@ class Capture(object):
             outband = outRaster.GetRasterBand(i+1)
             outdata = im_aligned[:,:,i]
             outdata[outdata<0] = 0
-            outdata[outdata>1] = 1
-            outband.WriteArray(outdata*32768)
+            outdata[outdata>2] = 2   #limit reflectance data to 200% to allow some specular reflections
+            outband.WriteArray(outdata*32768) # scale reflectance images so 100% = 32768
             outband.FlushCache()
 
         if bands == 6:

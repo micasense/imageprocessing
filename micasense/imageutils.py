@@ -171,7 +171,7 @@ def align(pair):
             'match_index': pair['match_index'],
             'warp_matrix': warp_matrix }
 
-def align_capture(capture, ref_index=0, warp_mode=cv2.MOTION_HOMOGRAPHY, max_iterations=2500, epsilon_threshold=1e-9, multithreaded=True, debug=False):
+def align_capture(capture, ref_index=1, warp_mode=cv2.MOTION_HOMOGRAPHY, max_iterations=2500, epsilon_threshold=1e-9, multithreaded=True, debug=False):
     '''Align images in a capture using openCV
     MOTION_TRANSLATION sets a translational motion model; warpMatrix is 2x3 with the first 2x2 part being the unity matrix and the rest two parameters being estimated.
     MOTION_EUCLIDEAN sets a Euclidean (rigid) transformation as motion model; three parameters are estimated; warpMatrix is 2x3.
@@ -183,10 +183,10 @@ def align_capture(capture, ref_index=0, warp_mode=cv2.MOTION_HOMOGRAPHY, max_ite
     ref_img = capture.images[ref_index].undistorted(capture.images[ref_index].radiance()).astype('float32')
     alignment_pairs = []
     for img in capture.images:
-        # if img.rig_relatives is not None:
-        #     translations = img.rig_xy_offset_in_px()
-        # else:
-        translations = (0,0)
+        if img.rig_relatives is not None:
+            translations = img.rig_xy_offset_in_px()
+        else:
+            translations = (0,0)
         if img.band_name != 'LWIR':
             alignment_pairs.append({'warp_mode': warp_mode,
                                     'max_iterations': max_iterations,
