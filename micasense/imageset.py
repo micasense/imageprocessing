@@ -59,9 +59,9 @@ class ImageSet(object):
 
         images = []
 
-        if exiftool_path is None:
+        if exiftool_path is None and os.environ.get('exiftoolpath') is not None:
             exiftool_path = os.path.normpath(os.environ.get('exiftoolpath'))
-        
+
         with exiftool.ExifTool(exiftool_path) as exift:
             for i,path in enumerate(matches):
                 images.append(image.Image(path, exiftool_obj=exift))
