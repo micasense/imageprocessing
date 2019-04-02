@@ -29,26 +29,6 @@ import math
 import micasense.image as image
 import micasense.panel as panel
 
-@pytest.fixture()
-def panel_image_name():
-    image_path = os.path.join('data', '0000SET', '000')
-    return os.path.join(image_path, 'IMG_0000_1.tif')
-
-@pytest.fixture()
-def flight_image_name():
-    image_path = os.path.join('data', '0000SET', '000')
-    return os.path.join(image_path, 'IMG_0001_1.tif')
-
-@pytest.fixture()
-def altum_panel_image_name():
-    image_path = os.path.join('data', 'ALTUM1SET', '000')
-    return os.path.join(image_path, 'IMG_0000_1.tif')
-
-@pytest.fixture()
-def altum_lwir_image_name():
-    image_path = os.path.join('data', 'ALTUM1SET', '000')
-    return os.path.join(image_path, 'IMG_0000_6.tif')
-
 def test_qr_corners(panel_image_name):
     img = image.Image(panel_image_name)
     pan = panel.Panel(img)
