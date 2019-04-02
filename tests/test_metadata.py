@@ -28,22 +28,6 @@ import os, glob
 
 import micasense.metadata as metadata
 
-@pytest.fixture()
-def meta():
-    image_path = os.path.join('data', '0000SET', '000')
-    return metadata.Metadata(os.path.join(image_path, 'IMG_0000_1.tif'))
-
-@pytest.fixture()
-def meta_v3():
-    image_path = os.path.join('data', '0001SET', '000')
-    return metadata.Metadata(os.path.join(image_path, 'IMG_0002_4.tif'))
-
-@pytest.fixture()
-def meta_bad_exposure():
-    image_path = os.path.join('data', '0001SET', '000')
-    return metadata.Metadata(os.path.join(image_path, 'IMG_0003_1.tif'))
-
-
 def test_load_image_metadata(meta):
     assert meta is not None
 

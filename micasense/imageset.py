@@ -32,6 +32,9 @@ import micasense.image as image
 import micasense.capture as capture
 import multiprocessing
 
+import exiftool
+
+
 def image_from_file(filename):
     return image.Image(filename)
 
@@ -44,7 +47,7 @@ class ImageSet(object):
         captures.sort()
         
     @classmethod
-    def from_directory(cls, directory, progress_callback=None):
+    def from_directory(cls, directory, progress_callback=None, exiftool_path=None):
         """
         Create and ImageSet recursively from the files in a directory
         """
@@ -54,14 +57,17 @@ class ImageSet(object):
             for filename in fnmatch.filter(filenames, '*.tif'):
                 matches.append(os.path.join(root, filename))
 
-        pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
         images = []
-        for i,img in enumerate(pool.imap_unordered(image_from_file, matches)):
-            images.append(img)
-            if progress_callback is not None:
-                progress_callback(float(i)/float(len(matches)))
-        pool.close() 
-        pool.join()
+
+        if exiftool_path is None:
+            exiftool_path = os.path.normpath(os.environ.get('exiftoolpath'))
+        
+        with exiftool.ExifTool(exiftool_path) as exift:
+            for i,path in enumerate(matches):
+                images.append(image.Image(path, exiftool_obj=exift))
+                if progress_callback is not None:
+                    progress_callback(float(i)/float(len(matches)))
+
         # create a dictionary to index the images so we can sort them
         # into captures
         # {
