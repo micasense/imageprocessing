@@ -110,7 +110,10 @@ def align(pair):
 
     w = pair['ref_image'].shape[1]
 
-    nol =  int(w / (1280/3)) - 1
+    if pair['pyramid_levels'] is None:
+        nol =  int(w / (1280/3)) - 1
+    else:
+        nol = pair['pyramid_levels']
 
     if pair['debug']:
         print("number of pyramid levels: {}".format(nol))
@@ -171,7 +174,7 @@ def align(pair):
             'match_index': pair['match_index'],
             'warp_matrix': warp_matrix }
 
-def align_capture(capture, ref_index=1, warp_mode=cv2.MOTION_HOMOGRAPHY, max_iterations=2500, epsilon_threshold=1e-9, multithreaded=True, debug=False):
+def align_capture(capture, ref_index=1, warp_mode=cv2.MOTION_HOMOGRAPHY, max_iterations=2500, epsilon_threshold=1e-9, multithreaded=True, debug=False, pyramid_levels = None):
     '''Align images in a capture using openCV
     MOTION_TRANSLATION sets a translational motion model; warpMatrix is 2x3 with the first 2x2 part being the unity matrix and the rest two parameters being estimated.
     MOTION_EUCLIDEAN sets a Euclidean (rigid) transformation as motion model; three parameters are estimated; warpMatrix is 2x3.
@@ -196,7 +199,8 @@ def align_capture(capture, ref_index=1, warp_mode=cv2.MOTION_HOMOGRAPHY, max_ite
                                     'match_index':img.band_index,
                                     'match_image':img.undistorted(img.radiance()).astype('float32'),
                                     'translations': translations,
-                                    'debug': debug})
+                                    'debug': debug,
+                                    'pyramid_levels': pyramid_levels})
 
     warp_matrices = [None]*len(alignment_pairs)
 

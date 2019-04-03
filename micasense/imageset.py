@@ -59,11 +59,8 @@ class ImageSet(object):
 
         images = []
 
-        if exiftool_path is None:
-            try:
-                exiftool_path = os.path.normpath(os.environ.get('exiftoolpath'))
-            except Exception:
-                pass
+        if exiftool_path is None and os.environ.get('exiftoolpath') is not None:
+            exiftool_path = os.path.normpath(os.environ.get('exiftoolpath'))
 
         with exiftool.ExifTool(exiftool_path) as exift:
             for i,path in enumerate(matches):

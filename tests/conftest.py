@@ -139,3 +139,7 @@ def meta_v3():
 def meta_bad_exposure():
     image_path = os.path.join('data', '0001SET', '000')
     return metadata.Metadata(os.path.join(image_path, 'IMG_0003_1.tif'))
+
+@pytest.fixture()
+def meta_altum_dls2(altum_flight_image_name):
+    return metadata.Metadata(altum_flight_image_name)

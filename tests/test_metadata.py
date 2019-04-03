@@ -126,3 +126,9 @@ def test_good_exposure_v3(meta_v3):
 
 def test_bad_exposure_time(meta_bad_exposure):
     assert meta_bad_exposure.exposure() == pytest.approx(247e-6, abs=1e-3)
+
+def test_dls1_scale_factor(meta):
+    assert meta.irradiance_scale_factor() == pytest.approx(1.0)
+
+def test_dls2_scale_factor(meta_altum_dls2):
+    assert meta_altum_dls2.irradiance_scale_factor() == pytest.approx(0.01)
