@@ -146,11 +146,7 @@ class Metadata(object):
         return yaw, pitch, roll
 
     def dls_irradiance(self):
-        if self.get_item('XMP:SpectralIrradiance') is not None:
-            irr = float(self.get_item('XMP:SpectralIrradiance'))
-        else:
-            irr = 0.0
-        return irr
+        return self.spectral_irradiance()
 
     def rig_relatives(self):
         if self.get_item('XMP:RigRelatives') is not None:
@@ -266,17 +262,32 @@ class Metadata(object):
         else:
             return 0.0
 
+    # due to calibration differences between DLS1 and DLS2, we need to account for a scale factor
+    # change in their respective units. This scale factor is pulled from the image metadata, or, if
+    # the metadata doesn't give us the scale, we assume one based on a known combination of tags
+    def irradiance_scale_factor(self):
+        if self.get_item('XMP:IrradianceScaleToSIUnits') is not None:
+             # the metadata contains the scale
+            scale_factor = self.__float_or_zero(self.get_item('XMP:IrradianceScaleToSIUnits'))
+        elif self.get_item('XMP:HorizontalIrradiance') is not None: 
+            # DLS2 but the metadata is missing the scale, assume 0.01
+            scale_factor = 0.01
+        else:
+            # DLS1, so we use a scale of 1
+            scale_factor = 1.0
+        return scale_factor
+
     def spectral_irradiance(self):
-        return self.__float_or_zero(self.get_item('XMP:SpectralIrradiance'))
+        return self.__float_or_zero(self.get_item('XMP:SpectralIrradiance'))*self.irradiance_scale_factor()
 
     def horizontal_irradiance(self):
-        return self.__float_or_zero(self.get_item('XMP:HorizontalIrradiance'))/100.0
+        return self.__float_or_zero(self.get_item('XMP:HorizontalIrradiance'))*self.irradiance_scale_factor()
 
     def scattered_irradiance(self):
-        return self.__float_or_zero(self.get_item('XMP:ScatteredIrradiance'))
+        return self.__float_or_zero(self.get_item('XMP:ScatteredIrradiance'))*self.irradiance_scale_factor()
 
     def direct_irradiance(self):
-        return self.__float_or_zero(self.get_item('XMP:DirectIrradiance'))
+        return self.__float_or_zero(self.get_item('XMP:DirectIrradiance'))*self.irradiance_scale_factor()
 
     def solar_azimuth(self):
         return self.__float_or_zero(self.get_item('XMP:SolarAzimuth'))

@@ -365,7 +365,7 @@ class Capture(object):
 
         rows, cols, bands = im_aligned.shape
         driver = GetDriverByName('GTiff')
-        outRaster = driver.Create(outfilename, cols, rows, bands, GDT_UInt16)
+        outRaster = driver.Create(outfilename, cols, rows, bands, GDT_UInt16, options = [ 'INTERLEAVE=BAND','COMPRESS=DEFLATE' ])
         if outRaster is None:
             raise IOError("could not load gdal GeoTiff driver")
         for i in range(0,5):
