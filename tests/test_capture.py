@@ -183,9 +183,42 @@ def test_altum_horizontal_irradiance(non_panel_altum_capture):
 def test_altum_panels(panel_altum_capture):
     assert panel_altum_capture.panels_in_all_expected_images() == True
 
-def test_stack_export(non_panel_altum_capture, tmpdir):
+@pytest.fixture()
+def aligned_altum_capture(non_panel_altum_capture):
+    non_panel_altum_capture.create_aligned_capture(img_type='radiance')
+    return non_panel_altum_capture
+
+def test_stack_export(aligned_altum_capture, tmpdir):
     pathstr = str(tmpdir.join('test_bgrent.tiff'))
-    non_panel_altum_capture.save_capture_as_stack(pathstr)
+    aligned_altum_capture.save_capture_as_stack(pathstr)
     assert os.path.exists(pathstr)
-    if tmpdir.check(): 
+    if tmpdir.check():
+        tmpdir.remove()
+
+def test_rgb_jpg(aligned_altum_capture, tmpdir):
+    pathstr = str(tmpdir.join('test_rgb.jpg'))
+    aligned_altum_capture.save_capture_as_rgb(pathstr)
+    assert os.path.exists(pathstr)
+    if tmpdir.check():
+        tmpdir.remove()
+
+def test_rgb_png(aligned_altum_capture, tmpdir):
+    pathstr = str(tmpdir.join('test_rgb.png'))
+    aligned_altum_capture.save_capture_as_rgb(pathstr)
+    assert os.path.exists(pathstr)
+    if tmpdir.check():
+        tmpdir.remove()
+
+def test_rgb_jpg_decimation(aligned_altum_capture, tmpdir):
+    import imageio
+    decimations = [2,5,8]
+    for decimation in decimations:
+        pathstr = str(tmpdir.join('test_rgb_{}x.jpg'.format(decimation)))
+        aligned_altum_capture.save_capture_as_rgb(pathstr, downsample=decimation)
+        assert os.path.exists(pathstr)
+        img = imageio.imread(pathstr)
+        assert img.shape[0] == round(float(aligned_altum_capture.aligned_shape()[0])/float(decimation))
+        assert img.shape[1] == round(float(aligned_altum_capture.aligned_shape()[1])/float(decimation))
+
+    if tmpdir.check():
         tmpdir.remove()

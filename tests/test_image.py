@@ -104,3 +104,15 @@ def test_altum_lwir_image(altum_lwir_image):
     assert altum_lwir_image.meta.band_name() == 'LWIR'
     assert altum_lwir_image.size() == (160,120)
     assert altum_lwir_image.auto_calibration_image == False
+
+def test_altum_image_horizontal_irradiance(altum_flight_image):
+    assert altum_flight_image.dls_present
+    good_horiz_irradiance = 1.222
+    assert altum_flight_image.horizontal_irradiance == pytest.approx(good_horiz_irradiance, 1e-3)
+
+def test_altum_bad_dls2_horizontal_irradiance(bad_dls2_horiz_irr_image):
+    assert bad_dls2_horiz_irr_image.dls_present
+    assert bad_dls2_horiz_irr_image.meta.horizontal_irradiance_valid() == False
+    good_horiz_irradiance = 1.318
+    assert bad_dls2_horiz_irr_image.horizontal_irradiance == pytest.approx(good_horiz_irradiance, 1e-3)
+

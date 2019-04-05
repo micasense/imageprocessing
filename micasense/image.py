@@ -34,6 +34,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import micasense.plotutils as plotutils
 import micasense.metadata as metadata
+import micasense.dls as dls
 
 #helper function to convert euler angles to a rotation matrix
 def rotations_degrees_to_rotation_matrix(rotation_degrees):
@@ -75,9 +76,9 @@ class Image(object):
 
         self.utc_time = self.meta.utc_time()
         self.latitude, self.longitude, self.altitude = self.meta.position()
+        self.location = (self.latitude, self.longitude, self.altitude)
         self.dls_present = self.meta.dls_present()
         self.dls_yaw, self.dls_pitch, self.dls_roll = self.meta.dls_pose()
-        self.dls_irradiance = self.meta.dls_irradiance()
         self.capture_id = self.meta.capture_id()
         self.flight_id = self.meta.flight_id()
         self.band_name = self.meta.band_name()
@@ -88,6 +89,10 @@ class Image(object):
         self.exposure_time = self.meta.exposure()
         self.gain = self.meta.gain()
         self.bits_per_pixel = self.meta.bits_per_pixel()
+
+        if self.bits_per_pixel != 16:
+            NotImplemented("Unsupported pixel bit depth: {} bits".format(self.bits_per_pixel))
+        
         self.vignette_center = self.meta.vignette_center()
         self.vignette_polynomial = self.meta.vignette_polynomial()
         self.distortion_parameters = self.meta.distortion_parameters()
@@ -98,20 +103,58 @@ class Image(object):
         self.bandwidth = self.meta.bandwidth()
         self.rig_relatives = self.meta.rig_relatives()
         self.spectral_irradiance = self.meta.spectral_irradiance()
-        self.horizontal_irradiance = self.meta.horizontal_irradiance()
-        self.scattered_irradiance = self.meta.scattered_irradiance()
-        self.direct_irradiance = self.meta.direct_irradiance()
-        self.solar_azimuth = self.meta.solar_azimuth()
-        self.solar_elevation = self.meta.solar_elevation()
-        self.estimated_direct_vector = self.meta.estimated_direct_vector()
+
         self.auto_calibration_image = self.meta.auto_calibration_image()
         self.panel_albedo = self.meta.panel_albedo()
         self.panel_region = self.meta.panel_region()
         self.panel_serial = self.meta.panel_serial()
-        
-        if self.bits_per_pixel != 16:
-            NotImplemented("Unsupported pixel bit depth: {} bits".format(self.bits_per_pixel))
 
+        if self.dls_present:
+            self.dls_orientation_vector = np.array([0,0,-1])
+            self.sun_vector_ned, \
+            self.sensor_vector_ned, \
+            self.sun_sensor_angle, \
+            self.solar_elevation, \
+            self.solar_azimuth=dls.compute_sun_angle(self.location,
+                                            self.meta.dls_pose(),
+                                            self.utc_time,
+                                            self.dls_orientation_vector)
+            self.angular_correction = dls.fresnel(self.sun_sensor_angle)
+
+            # when we have good horizontal irradiance the camera provides the solar az and el also
+            if self.meta.scattered_irradiance() != 0 and self.meta.direct_irradiance() != 0:
+                self.solar_azimuth = self.meta.solar_azimuth()
+                self.solar_elevation = self.meta.solar_elevation()
+                self.scattered_irradiance = self.meta.scattered_irradiance()
+                self.direct_irradiance = self.meta.direct_irradiance()
+                self.direct_to_diffuse_ratio = self.meta.direct_irradiance() / self.meta.scattered_irradiance()
+                self.estimated_direct_vector = self.meta.estimated_direct_vector()
+                if self.meta.horizontal_irradiance_valid():
+                    self.horizontal_irradiance = self.meta.horizontal_irradiance()
+                else: 
+                    self.horizontal_irradiance = self.compute_horizontal_irradiance_dls2()
+            else:
+                self.direct_to_diffuse_ratio = 6.0 # assumption
+                self.horizontal_irradiance = self.compute_horizontal_irradiance_dls1()
+
+            self.spectral_irradiance = self.meta.spectral_irradiance()
+        else: # no dls present or LWIR band: compute what we can, set the rest to 0
+            self.dls_orientation_vector = np.array([0,0,-1])
+            self.sun_vector_ned, \
+            self.sensor_vector_ned, \
+            self.sun_sensor_angle, \
+            self.solar_elevation, \
+            self.solar_azimuth=dls.compute_sun_angle(self.location,
+                                            (0,0,0),
+                                            self.utc_time,
+                                            self.dls_orientation_vector)
+            self.angular_correction = dls.fresnel(self.sun_sensor_angle)
+            self.horizontal_irradiance = 0
+            self.scattered_irradiance = 0
+            self.direct_irradiance = 0
+            self.direct_to_diffuse_ratio = 0
+            
+        # Internal image containers; these can use a lot of memory, clear with Image.clear_images
         self.__raw_image = None # pure raw pixels
         self.__intensity_image = None # black level and gain-exposure/radiometric compensated
         self.__radiance_image = None # calibrated to radiance
@@ -119,6 +162,30 @@ class Image(object):
         self.__reflectance_irradiance = None
         self.__undistorted_source = None # can be any of raw, intensity, radiance
         self.__undistorted_image = None # current undistorted image, depdining on source
+
+    def compute_horizontal_irradiance_dls1(self):
+        percent_diffuse = 1.0/self.direct_to_diffuse_ratio
+        #percent_diffuse = 5e4/(img.center_wavelength**2)
+        sensor_irradiance = self.spectral_irradiance / self.angular_correction
+        # find direct irradiance in the plane normal to the sun
+        untilted_direct_irr = sensor_irradiance / (percent_diffuse + np.cos(self.sun_sensor_angle))
+        self.direct_irradiance = untilted_direct_irr
+        self.scattered_irradiance = untilted_direct_irr*percent_diffuse
+        # compute irradiance on the ground using the solar altitude angle
+        ground_irr = untilted_direct_irr * (percent_diffuse + np.sin(self.solar_elevation))
+
+        return ground_irr
+    
+    def compute_horizontal_irradiance_dls2(self):
+        ''' Compute the proper solar elevation, solar azimuth, and horizontal irradiance 
+            for cases where the camera system did not do it correctly '''
+        _,_,_, \
+        self.solar_elevation, \
+        self.solar_azimuth=dls.compute_sun_angle(self.location,
+                                        (0,0,0),
+                                        self.utc_time,
+                                        np.array([0,0,-1]))
+        return self.direct_irradiance*np.cos(self.solar_elevation) + self.scattered_irradiance
 
     def __lt__(self, other):
         return self.band_index < other.band_index
