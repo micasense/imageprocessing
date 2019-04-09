@@ -103,7 +103,8 @@ def align(pair):
 
     # Initialize the matrix to identity
     if warp_mode == cv2.MOTION_HOMOGRAPHY:
-        warp_matrix = np.array([[1,0,translations[1]],[0,1,translations[0]],[0,0,1]], dtype=np.float32)
+        # warp_matrix = np.array([[1,0,0],[0,1,0],[0,0,1]], dtype=np.float32)
+        warp_matrix = pair['warp_matrix_init']
     else:
         # warp_matrix = np.array([[1,0,0],[0,1,0]], dtype=np.float32)
         warp_matrix = np.array([[1,0,translations[1]],[0,1,translations[0]]], dtype=np.float32)
@@ -184,8 +185,11 @@ def align_capture(capture, ref_index=1, warp_mode=cv2.MOTION_HOMOGRAPHY, max_ite
     '''
     # Match other bands to this reference image (index into capture.images[])
     ref_img = capture.images[ref_index].undistorted(capture.images[ref_index].radiance()).astype('float32')
+    
+    warp_matrices_init = capture.get_warp_matrices(ref_index=ref_index)
+
     alignment_pairs = []
-    for img in capture.images:
+    for i,img in enumerate(capture.images):
         if img.rig_relatives is not None:
             translations = img.rig_xy_offset_in_px()
         else:
@@ -199,15 +203,14 @@ def align_capture(capture, ref_index=1, warp_mode=cv2.MOTION_HOMOGRAPHY, max_ite
                                     'match_index':img.band_index,
                                     'match_image':img.undistorted(img.radiance()).astype('float32'),
                                     'translations': translations,
+                                    'warp_matrix_init': np.array(warp_matrices_init[i], dtype=np.float32),
                                     'debug': debug,
                                     'pyramid_levels': pyramid_levels})
-
     warp_matrices = [None]*len(alignment_pairs)
 
     #required to work across linux/mac/windows, see https://stackoverflow.com/questions/47852237
     if multithreaded and multiprocessing.get_start_method() != 'spawn':
         try:
-            
             multiprocessing.set_start_method('spawn',force=True)
         except ValueError:
             multithreaded = False
@@ -220,7 +223,7 @@ def align_capture(capture, ref_index=1, warp_mode=cv2.MOTION_HOMOGRAPHY, max_ite
         pool.close()
         pool.join()
     else:
-    # Single-threaded alternative, comment all above
+        # Single-threaded alternative
         for pair in alignment_pairs:
             mat = align(pair)
             warp_matrices[mat['match_index']] = mat['warp_matrix']

@@ -155,10 +155,10 @@ class Capture(object):
 
     def dls_irradiance_raw(self):
         '''Returns a list of the raw DLS measurements from the image metadata'''
-        return [img.dls_irradiance for img in self.images]
+        return [img.spectral_irradiance for img in self.images]
 
     def dls_irradiance(self):
-        '''Returns a list of the corrected DLS irradiance in W/m^2/nm'''
+        '''Returns a list of the corrected earth-surface (horizontal) DLS irradiance in W/m^2/nm'''
         return [img.horizontal_irradiance for img in self.images]
 
     def dls_pose(self):
