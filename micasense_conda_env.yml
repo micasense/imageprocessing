@@ -12,6 +12,7 @@ dependencies:
   - scikit-image
   - pytest
   - git
+  - git-lfs
   - pandas
   - imageio
   - nb_conda
