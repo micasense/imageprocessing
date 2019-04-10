@@ -2,7 +2,7 @@ name: micasense
 channels:
   - conda-forge
 dependencies:
-  - python=3.6
+  - python=3
   - opencv
   - numpy
   - jupyter
@@ -12,11 +12,14 @@ dependencies:
   - scikit-image
   - pytest
   - git
+  - git-lfs
   - pandas
   - imageio
-  - ipywidgets
   - nb_conda
+  - requests
+  - packaging
   - pip:
     - pyzbar
     - mapboxgl
     - git+https://github.com/smarnach/pyexiftool.git#egg=pyexiftoolpy
+    - jenkspy

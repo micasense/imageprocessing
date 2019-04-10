@@ -26,6 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.pylab import cm
 
 def plotwithcolorbar(img, title=None, figsize=None, vmin=None, vmax=None):
     ''' Plot an image with a colorbar '''
@@ -41,7 +42,7 @@ def plotwithcolorbar(img, title=None, figsize=None, vmin=None, vmax=None):
 
 def subplotwithcolorbar(rows, cols, images, titles=None, figsize=None):
     ''' Plot a set of images in subplots '''
-    fig, axes = plt.subplots(rows, cols, figsize=figsize)
+    fig, axes = plt.subplots(rows, cols, figsize=figsize,squeeze=False)
     for i in range(cols*rows):
         column = int(i%cols)
         row = int(i/cols)
@@ -58,22 +59,34 @@ def subplotwithcolorbar(rows, cols, images, titles=None, figsize=None):
     plt.show()
     return fig, axes
 
-def plot_overlay_withcolorbar(imgbase, imgcolor, title=None, figsize=None, vmin=None, vmax=None, overlay_alpha=1.0):
+def plot_overlay_withcolorbar(imgbase, imgcolor, title=None, figsize=None, vmin=None, vmax=None, overlay_alpha=1.0, overlay_colormap='viridis', overlay_steps=None, display_contours=False, contour_fmt=None, contour_steps=None, contour_alpha=None):
     ''' Plot an image with a colorbar '''
-    fig, axis = plt.subplots(1, 1, figsize=figsize)
-    base = axis.imshow(imgbase)
-    rad2 = axis.imshow(imgcolor, vmin=vmin, vmax=vmax, alpha=overlay_alpha)
-    axis.set_title(title)
-    divider = make_axes_locatable(axis)
+    fig, axis = plt.subplots(1, 1, figsize=figsize, squeeze=False)
+    base = axis[0][0].imshow(imgbase)
+    if overlay_steps is not None:
+        overlay_colormap = cm.get_cmap(overlay_colormap,overlay_steps)
+    rad2 = axis[0][0].imshow(imgcolor, vmin=vmin, vmax=vmax, alpha=overlay_alpha, cmap=overlay_colormap)
+    if display_contours:
+        if contour_steps is None:
+            contour_steps = overlay_steps
+        if contour_alpha is None:
+            contour_alpha = overlay_alpha
+        contour_cmap = cm.get_cmap(overlay_colormap,contour_steps)
+        contour_list = np.arange(vmin, vmax, (vmax-vmin)/contour_steps)
+        rad3 = axis[0][0].contour(imgcolor, contour_list, cmap=contour_cmap, alpha=contour_alpha)
+        fontsize=8+(max(figsize)/10)*2
+        axis[0][0].clabel(rad3,rad3.levels,inline=True,fontsize=fontsize,fmt=contour_fmt)
+    axis[0][0].set_title(title)
+    divider = make_axes_locatable(axis[0][0])
     cax = divider.append_axes("right", size="3%", pad=0.05)
     fig.colorbar(rad2, cax=cax)
     plt.tight_layout()
     plt.show()
-    return fig, axis
+    return fig, axis[0][0]
 
 def subplot(rows, cols, images, titles=None, figsize=None):
     ''' Plot a set of images in subplots '''
-    fig, axes = plt.subplots(rows, cols, figsize=figsize)
+    fig, axes = plt.subplots(rows, cols, figsize=figsize, squeeze=False)
     for i in range(cols*rows):
         column = int(i%cols)
         row = int(i/cols)

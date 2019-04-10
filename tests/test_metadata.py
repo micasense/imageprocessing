@@ -28,22 +28,6 @@ import os, glob
 
 import micasense.metadata as metadata
 
-@pytest.fixture()
-def meta():
-    image_path = os.path.join('data', '0000SET', '000')
-    return metadata.Metadata(os.path.join(image_path, 'IMG_0000_1.tif'))
-
-@pytest.fixture()
-def meta_v3():
-    image_path = os.path.join('data', '0001SET', '000')
-    return metadata.Metadata(os.path.join(image_path, 'IMG_0002_4.tif'))
-
-@pytest.fixture()
-def meta_bad_exposure():
-    image_path = os.path.join('data', '0001SET', '000')
-    return metadata.Metadata(os.path.join(image_path, 'IMG_0003_1.tif'))
-
-
 def test_load_image_metadata(meta):
     assert meta is not None
 
@@ -129,7 +113,7 @@ def test_firmware_version_v3(meta_v3):
     assert meta_v3.firmware_version() == "v3.3.0"
 
 def test_dls_irradiance(meta):
-    assert meta.dls_irradiance() == pytest.approx(1.0848, abs=0.0001)
+    assert meta.spectral_irradiance() == pytest.approx(1.0848, abs=0.0001)
 
 def test_dls_pose(meta):
     assert meta.dls_pose() == pytest.approx((-3.070, -0.188, -0.013), abs=0.001)
@@ -142,3 +126,18 @@ def test_good_exposure_v3(meta_v3):
 
 def test_bad_exposure_time(meta_bad_exposure):
     assert meta_bad_exposure.exposure() == pytest.approx(247e-6, abs=1e-3)
+
+def test_dls1_scale_factor(meta):
+    assert meta.irradiance_scale_factor() == pytest.approx(1.0)
+
+def test_dls_present_dls2(meta_altum_dls2):
+    assert meta_altum_dls2.dls_present() == True
+    
+def test_dls2_scale_factor(meta_altum_dls2):
+    assert meta_altum_dls2.irradiance_scale_factor() == pytest.approx(0.01)
+
+def test_horizontal_irradiance_valid(meta):
+    assert meta.horizontal_irradiance_valid() == False
+
+def test_horizontal_irradiance_valid_altum(meta_altum_dls2):
+    assert meta_altum_dls2.horizontal_irradiance_valid() == True
