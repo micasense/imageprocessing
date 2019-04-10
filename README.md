@@ -10,11 +10,11 @@ A working knowledge of running Python software on your system and using the comm
 
 You can start today even if you don't have your own RedEdge or Altum. We provide example images, including full flight datasets.
 
-For a user of RedEdge or Altum that wants a turnkey processing solution, this repository probably is not the best place to start.  Check out some of the MicaSense processing partners who can provide turnkey software for processing and analysis.
+For a user of RedEdge or Altum that wants a turnkey processing solution, this repository probably is not the best place to start.  Instead consider one of the MicaSense processing partners who provide turnkey software for processing and analysis.
 
 ### Tutorial Articles
 
-[Click here](https://micasense.github.io/imageprocessing). to view the tutorial articles. This set of example notebooks and their outputs can be viewed in your browser without downloading anything.
+[Click here to view the tutorial articles](https://micasense.github.io/imageprocessing/index.html). The set of example notebooks and their outputs can be viewed in your browser without downloading anything or running any code.
 
 ### How do I get set up?
 
@@ -43,22 +43,24 @@ That command should open a web browser window showing the set of files and folde
 
 Second, a set of helper utilities is available in the `micasense` folder that can be used both with these tutorials as well as separtely. 
 
-Note that some of the hyperlinks in the notebooks may give you a 404 Not Found error. This is because the links are setup to allow the list of files above to be accessed on the github.io site.  When running the notebooks, use your jupyter "home" tab to open different notebooks.
+Note that some of the hyperlinks in the notebooks may give you a 404 Not Found error. This is because the links are setup to allow the list of files above to be accessed on the github.io site.  When running the notebooks, use your jupyter "home" tab to open the different notebooks.
 
 ### Contribution guidelines
 
-Find a problem with the tutorial? Please look through the existing issues (open and closed) and if it's new, create an issue on github. 
+Find a problem with the tutorial? Please look through the existing issues (open and closed) and if it's new, [create an issue on github](https://github.com/micasense/imageprocessing/issues). 
 
 Want to correct an issue or expand library functionality?  Fork the repository, make your fix, and submit a pull request on github.
 
-Have a question? Double-check that you're able to run the setup notebook successfully, and then check the [MicaSense Knowledgebase](https://support.micasense.com) before contacting support.
+Have a question? Please double-check that you're able to run the setup notebook successfully, and resolve any issues with that first.  If you're pulling newer code, it may be necessary in some cases to delete and re-create your `micasense` conda environment to make sure you have all of the expected packages.  
+
+This code is a community effort and is not supported by MicaSense support. Please don't reach out to MicaSense support for issues with this codebase; instead, work through the above troubleshooting steps and then [create an issue on github](https://github.com/micasense/imageprocessing/issues).
 
 ### Tests
 
 Tests for many library functions are included in the `tests` diretory. Install the `pytest` module through your package manager (e.g. `pip install pytest`) and then tests can be run from the main directory using the command:
 
 ```bash
-pytest tests
+pytest .
 ```
 
 Data used by the tests is included in the `data` folder.
