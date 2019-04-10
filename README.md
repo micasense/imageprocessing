@@ -2,28 +2,27 @@
 
 ### MicaSense RedEdge Image Processing Tutorials 
 
-This repository includes tutorials and examples for processing MicaSense RedEdge images into usable information using the python programming language.  The intended audience is researchers and developers with some software development experience that want to do their own image processing.  While a number of commercial tools fully support processing RedEdge data into reflectance maps, there are a number of reasons to process your own data, including controlling the entire radiometric workflow (for academic or publication reasons), pre-processing images to be used in a non-radiometric photogrammetry suite, or processing single sets of 5 images without building a larger map.
+This repository includes tutorials and examples for processing MicaSense RedEdge and Altum images into usable information using the python programming language.  The intended audience is researchers and developers with some software development experience that want to do their own image processing.  While a number of commercial tools fully support processing RedEdge data into reflectance maps, there are a number of reasons to process your own data, including controlling the entire radiometric workflow (for academic or publication reasons), pre-processing images to be used in a non-radiometric photogrammetry suite, or processing single sets of 5 images without building a larger map.
 
-### How do I get set up? 
+### What do I need to succeed?
+
+A working knowledge of running Python software on your system and using the command line are both very helpful. We've worked hard to make these tutorials straightforward to run and understand, but the target audience is someone that's looking to learn more about how to process their own imagery and write software to perform more powerful analysis.
+
+You can start today even if you don't have your own RedEdge or Altum. We provide example images, including full flight datasets.
+
+For a user of RedEdge or Altum that wants a turnkey processing solution, this repository probably is not the best place to start.  Check out some of the MicaSense processing partners who can provide turnkey software for processing and analysis.
+
+### Tutorial Articles
+
+[Click here](https://micasense.github.io/imageprocessing). to view the tutorial articles. This set of example notebooks and their outputs can be viewed in your browser without downloading anything.
+
+### How do I get set up?
 
 First, `git clone` this repository, as it has all of the code and examples you'll need.
 
 To do that you'll need [git](https://git-scm.com/downloads)
 
 Once you have git installed and the repository cloned, you are ready to start with the first tutorial. Check out the [setup tutorial](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Setup.html) which will walk through installing and checking the necessary tools to run the remaining tutorials.
-
-### Tutorial Articles
-
-1. [MicaSense Image Processing Setup](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Setup.html)
-1. [MicaSense Image Processing Tutorial #1](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Tutorial%201.html) (basic radiometic corrections)
-1. [MicaSense Image Processing Tutorial #2](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Tutorial%202.html) (library introduction)
-1. [MicaSense Image Processing Tutorial #3](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Tutorial%203.html) (basic DLS processing)
-1. [Image Class Examples](https://micasense.github.io/imageprocessing/Images.html)
-1. [Capture Class Examples](https://micasense.github.io/imageprocessing/Captures.html)
-1. [ImageSet Examples](https://micasense.github.io/imageprocessing/ImageSets.html)
-1. [Capture Alignment and Analysis Examples](https://micasense.github.io/imageprocessing/Alignment.html)
-1. [Capture Alignment Using Rig Relatives](https://micasense.github.io/imageprocessing/Alignment-RigRelatives.html)
-1. [Batch processing into stacked TIFFs](https://micasense.github.io/imageprocessing/Batch%20Processing.html)
 
 
 ### MicaSense Library Usage
