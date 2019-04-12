@@ -163,6 +163,11 @@ class Image(object):
         self.__undistorted_source = None # can be any of raw, intensity, radiance
         self.__undistorted_image = None # current undistorted image, depdining on source
 
+    # solar elevation is defined as the angle betwee the horizon and the sun, so it is 0 when the 
+    # sun is at the horizon and pi/2 when the sun is directly overhead
+    def horizontal_irradiance_from_direct_scattered(self):
+        return self.direct_irradiance * np.sin(self.solar_elevation) + self.scattered_irradiance
+
     def compute_horizontal_irradiance_dls1(self):
         percent_diffuse = 1.0/self.direct_to_diffuse_ratio
         #percent_diffuse = 5e4/(img.center_wavelength**2)
@@ -172,9 +177,7 @@ class Image(object):
         self.direct_irradiance = untilted_direct_irr
         self.scattered_irradiance = untilted_direct_irr*percent_diffuse
         # compute irradiance on the ground using the solar altitude angle
-        ground_irr = untilted_direct_irr * (percent_diffuse + np.sin(self.solar_elevation))
-
-        return ground_irr
+        return self.horizontal_irradiance_from_direct_scattered()
     
     def compute_horizontal_irradiance_dls2(self):
         ''' Compute the proper solar elevation, solar azimuth, and horizontal irradiance 
@@ -185,7 +188,7 @@ class Image(object):
                                         (0,0,0),
                                         self.utc_time,
                                         np.array([0,0,-1]))
-        return self.direct_irradiance*np.cos(self.solar_elevation) + self.scattered_irradiance
+        return self.horizontal_irradiance_from_direct_scattered()
 
     def __lt__(self, other):
         return self.band_index < other.band_index
