@@ -287,10 +287,10 @@ class Metadata(object):
         version_string = self.firmware_version().strip('v')
         if self.camera_model() == "Altum":
             good_version = "1.2.3"
-        elif self.camera_model() == 'RedEdge':
+        elif self.camera_model() == 'RedEdge' or self.camera_model() == 'RedEdge-M':
             good_version = "5.1.7"
         else:
-            raise ValueError("Camera model is required to be RedEdge or Altum ")
+            raise ValueError("Camera model is required to be RedEdge or Altum, not {} ".format(self.camera_model()))
         return version.parse(version_string) >= version.parse(good_version)
 
     def spectral_irradiance(self):
