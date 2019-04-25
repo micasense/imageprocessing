@@ -93,6 +93,7 @@ class ImageSet(object):
         columns = [
             'timestamp',
             'latitude','longitude','altitude',
+            'capture_id',
             'dls-yaw','dls-pitch','dls-roll'
         ]
         irr = ["irr-{}".format(wve) for wve in self.captures[0].center_wavelengths()]
@@ -101,9 +102,10 @@ class ImageSet(object):
         for cap in self.captures:
             dat = cap.utc_time()
             loc = list(cap.location())
+            uuid = cap.uuid
             dls_pose = list(cap.dls_pose())
             irr = cap.dls_irradiance()
-            row = [dat]+loc+dls_pose+irr
+            row = [dat]+loc+[uuid]+dls_pose+irr
             data.append(row)
         return data, columns
 

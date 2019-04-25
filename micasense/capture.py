@@ -35,6 +35,7 @@ import math
 import numpy as np
 import cv2
 import os
+import imageio
 
 class Capture(object):
     """
@@ -59,16 +60,8 @@ class Capture(object):
         self.panels = None
         self.detected_panel_count = 0
         self.panelCorners = panelCorners
-        self.dls_orientation_vector = np.array([0,0,-1])
-        self.sun_vector_ned, \
-        self.sensor_vector_ned, \
-        self.sun_sensor_angle, \
-        self.solar_elevation, \
-        self.solar_azimuth=dls.compute_sun_angle(self.location(),
-                                           self.dls_pose(),
-                                           self.utc_time(),
-                                           self.dls_orientation_vector)
-        self.angular_correction = dls.fresnel(self.sun_sensor_angle)
+
+        self.__aligned_capture = None
 
     def set_panelCorners(self,panelCorners):
         self.panelCorners = panelCorners
@@ -132,7 +125,7 @@ class Capture(object):
 
     def location(self):
         ''' (lat, lon, alt) tuple of WGS-84 location units are radians, meters msl'''
-        return (self.images[0].latitude, self.images[0].longitude, self.images[0].altitude)
+        return (self.images[0].location)
 
     def utc_time(self):
         ''' returns a timezone-aware datetime object of the capture time '''
@@ -146,6 +139,7 @@ class Capture(object):
            to call this after capture is processed'''
         for img in self.images:
             img.clear_image_data()
+        self.__aligned_capture = None
 
     def center_wavelengths(self):
         '''Returns a list of the image center wavelenghts in nanometers'''
@@ -161,26 +155,11 @@ class Capture(object):
 
     def dls_irradiance_raw(self):
         '''Returns a list of the raw DLS measurements from the image metadata'''
-        return [img.dls_irradiance for img in self.images]
+        return [img.spectral_irradiance for img in self.images]
 
     def dls_irradiance(self):
-        '''Returns a list of the corrected DLS irradiance in W/m^2/nm'''
-        ground_irradiances = []
-        if self.images[0].horizontal_irradiance != 0:
-            for img in self.images:
-                ground_irradiances.append(img.horizontal_irradiance)
-        else:
-            for img in self.images:
-                dir_dif_ratio = 6.0
-                percent_diffuse = 1.0/dir_dif_ratio
-                #percent_diffuse = 5e4/(img.center_wavelength**2)
-                sensor_irradiance = img.dls_irradiance / self.angular_correction
-                # find direct irradiance in the plane normal to the sun
-                untilted_direct_irr = sensor_irradiance / (percent_diffuse + np.cos(self.sun_sensor_angle))
-                # compute irradiance on the ground using the solar altitude angle
-                ground_irr = untilted_direct_irr * (percent_diffuse + np.sin(self.solar_elevation))
-                ground_irradiances.append(ground_irr)
-        return ground_irradiances
+        '''Returns a list of the corrected earth-surface (horizontal) DLS irradiance in W/m^2/nm'''
+        return [img.horizontal_irradiance for img in self.images]
 
     def dls_pose(self):
         '''Returns (yaw,pitch,roll) tuples in radians of the earth-fixed dls pose'''
@@ -342,35 +321,44 @@ class Capture(object):
         warp_matrices  =[np.linalg.inv(im.get_homography(ref)) for im in self.images]
         return [w/w[2,2] for w in warp_matrices]
 
-
-    def save_capture_as_stack(self, outfilename, irradiance_list=None, warp_matrices=None, normalize = False):
-        from osgeo.gdal import GetDriverByName, GDT_UInt16
-        if irradiance_list is None and self.dls_irradiance() is None:
+    def create_aligned_capture(self, irradiance_list=None, warp_matrices=None, normalize=False, img_type=None):
+        if img_type is None and irradiance_list is None and self.dls_irradiance() is None:
             self.compute_undistorted_radiance()
             img_type = 'radiance'
-        else:
+        elif img_type is None:
             if irradiance_list is None:
                 irradiance_list = self.dls_irradiance()+[0]
             self.compute_undistorted_reflectance(irradiance_list)
             img_type = 'reflectance'
         if warp_matrices is None:
             warp_matrices = self.get_warp_matrices()
-        cropped_dimensions,edges = imageutils.find_crop_bounds(self,warp_matrices)
-        im_aligned = imageutils.aligned_capture(self, 
+        cropped_dimensions,_ = imageutils.find_crop_bounds(self,warp_matrices)
+        self.__aligned_capture = imageutils.aligned_capture(self, 
                                                 warp_matrices, 
                                                 cv2.MOTION_HOMOGRAPHY, 
                                                 cropped_dimensions, 
                                                 None, 
                                                 img_type=img_type)
+        return self.__aligned_capture
 
-        rows, cols, bands = im_aligned.shape
+    def aligned_shape(self):
+        if self.__aligned_capture is None:
+            raise RuntimeError("call Capture.create_aligned_capture prior to saving as stack")
+        return self.__aligned_capture.shape
+
+    def save_capture_as_stack(self, outfilename):
+        from osgeo.gdal import GetDriverByName, GDT_UInt16
+        if self.__aligned_capture is None:
+            raise RuntimeError("call Capture.create_aligned_capture prior to saving as stack")
+
+        rows, cols, bands = self.__aligned_capture.shape
         driver = GetDriverByName('GTiff')
         outRaster = driver.Create(outfilename, cols, rows, bands, GDT_UInt16, options = [ 'INTERLEAVE=BAND','COMPRESS=DEFLATE' ])
         if outRaster is None:
             raise IOError("could not load gdal GeoTiff driver")
         for i in range(0,5):
             outband = outRaster.GetRasterBand(i+1)
-            outdata = im_aligned[:,:,i]
+            outdata = self.__aligned_capture[:,:,i]
             outdata[outdata<0] = 0
             outdata[outdata>2] = 2   #limit reflectance data to 200% to allow some specular reflections
             outband.WriteArray(outdata*32768) # scale reflectance images so 100% = 32768
@@ -378,9 +366,47 @@ class Capture(object):
 
         if bands == 6:
             outband = outRaster.GetRasterBand(6)
-            outdata = (im_aligned[:,:,5]+273.15) * 100 # scale data from float degC to back to centi-Kelvin to fit into uint16
+            outdata = (self.__aligned_capture[:,:,5]+273.15) * 100 # scale data from float degC to back to centi-Kelvin to fit into uint16
             outdata[outdata<0] = 0
             outdata[outdata>65535] = 65535
             outband.WriteArray(outdata)
             outband.FlushCache()
         outRaster = None
+
+    def save_capture_as_rgb(self, outfilename, gamma=1.4, downsample=1, white_balance='norm', hist_min_percent=0.5, hist_max_percent=99.5, sharpen=True):
+        rgb_band_indices = [2,1,0]
+        
+        if self.__aligned_capture is None:
+            raise RuntimeError("call Capture.create_aligned_capture prior to saving as RGB")
+        im_display = np.zeros((self.__aligned_capture.shape[0],self.__aligned_capture.shape[1],self.__aligned_capture.shape[2]), dtype=np.float32 )
+
+        im_min = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_min_percent)  # modify these percentiles to adjust contrast
+        im_max = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_max_percent)  # for many images, 0.5 and 99.5 are good values
+
+        for i in rgb_band_indices:
+            # for rgb true color, we usually want to use the same min and max scaling across the 3 bands to 
+            # maintain the "white balance" of the calibrated image  
+            if white_balance == 'norm':
+                im_display[:,:,i] =  imageutils.normalize(self.__aligned_capture[:,:,i], im_min, im_max)
+            else:
+                im_display[:,:,i] =  imageutils.normalize(self.__aligned_capture[:,:,i])
+
+        rgb = im_display[:,:,rgb_band_indices]
+        rgb = cv2.resize(rgb, None, fx=1/downsample, fy=1/downsample, interpolation=cv2.INTER_AREA)
+
+        if sharpen:
+            gaussian_rgb = cv2.GaussianBlur(rgb, (9,9), 10.0)
+            gaussian_rgb[gaussian_rgb<0] = 0
+            gaussian_rgb[gaussian_rgb>1] = 1
+            unsharp_rgb = cv2.addWeighted(rgb, 1.5, gaussian_rgb, -0.5, 0)
+            unsharp_rgb[unsharp_rgb<0] = 0
+            unsharp_rgb[unsharp_rgb>1] = 1
+        else:
+            unsharp_rgb = rgb
+
+        # Apply a gamma correction to make the render appear closer to what our eyes would see
+        if gamma != 0:
+            gamma_corr_rgb = unsharp_rgb**(1.0/gamma)
+            imageio.imwrite(outfilename, (255*gamma_corr_rgb).astype('uint8'))
+        else:
+            imageio.imwrite(outfilename, (255*unsharp_rgb).astype('uint8'))

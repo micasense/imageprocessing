@@ -143,3 +143,8 @@ def meta_bad_exposure():
 @pytest.fixture()
 def meta_altum_dls2(altum_flight_image_name):
     return metadata.Metadata(altum_flight_image_name)
+
+@pytest.fixture()
+def bad_dls2_horiz_irr_image():
+    image_path = os.path.join('data', 'ALTUM0SET', '000')
+    return image.Image(os.path.join(image_path, 'IMG_0000_1.tif'))

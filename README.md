@@ -2,28 +2,27 @@
 
 ### MicaSense RedEdge Image Processing Tutorials 
 
-This repository includes tutorials and examples for processing MicaSense RedEdge images into usable information using the python programming language.  The intended audience is researchers and developers with some software development experience that want to do their own image processing.  While a number of commercial tools fully support processing RedEdge data into reflectance maps, there are a number of reasons to process your own data, including controlling the entire radiometric workflow (for academic or publication reasons), pre-processing images to be used in a non-radiometric photogrammetry suite, or processing single sets of 5 images without building a larger map.
+This repository includes tutorials and examples for processing MicaSense RedEdge and Altum images into usable information using the python programming language.  The intended audience is researchers and developers with some software development experience that want to do their own image processing.  While a number of commercial tools fully support processing RedEdge data into reflectance maps, there are a number of reasons to process your own data, including controlling the entire radiometric workflow (for academic or publication reasons), pre-processing images to be used in a non-radiometric photogrammetry suite, or processing single sets of 5 images without building a larger map.
 
-### How do I get set up? 
+### What do I need to succeed?
+
+A working knowledge of running Python software on your system and using the command line are both very helpful. We've worked hard to make these tutorials straightforward to run and understand, but the target audience is someone that's looking to learn more about how to process their own imagery and write software to perform more powerful analysis.
+
+You can start today even if you don't have your own RedEdge or Altum. We provide example images, including full flight datasets.
+
+For a user of RedEdge or Altum that wants a turnkey processing solution, this repository probably is not the best place to start.  Instead consider one of the MicaSense processing partners who provide turnkey software for processing and analysis.
+
+### Tutorial Articles
+
+[Click here to view the tutorial articles](https://micasense.github.io/imageprocessing/index.html). The set of example notebooks and their outputs can be viewed in your browser without downloading anything or running any code.
+
+### How do I get set up?
 
 First, `git clone` this repository, as it has all of the code and examples you'll need.
 
 To do that you'll need [git](https://git-scm.com/downloads)
 
 Once you have git installed and the repository cloned, you are ready to start with the first tutorial. Check out the [setup tutorial](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Setup.html) which will walk through installing and checking the necessary tools to run the remaining tutorials.
-
-### Tutorial Articles
-
-1. [MicaSense Image Processing Setup](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Setup.html)
-1. [MicaSense Image Processing Tutorial #1](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Tutorial%201.html) (basic radiometic corrections)
-1. [MicaSense Image Processing Tutorial #2](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Tutorial%202.html) (library introduction)
-1. [MicaSense Image Processing Tutorial #3](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Tutorial%203.html) (basic DLS processing)
-1. [Image Class Examples](https://micasense.github.io/imageprocessing/Images.html)
-1. [Capture Class Examples](https://micasense.github.io/imageprocessing/Captures.html)
-1. [ImageSet Examples](https://micasense.github.io/imageprocessing/ImageSets.html)
-1. [Capture Alignment and Analysis Examples](https://micasense.github.io/imageprocessing/Alignment.html)
-1. [Capture Alignment Using Rig Relatives](https://micasense.github.io/imageprocessing/Alignment-RigRelatives.html)
-1. [Batch processing into stacked TIFFs](https://micasense.github.io/imageprocessing/Batch%20Processing.html)
 
 
 ### MicaSense Library Usage
@@ -44,22 +43,24 @@ That command should open a web browser window showing the set of files and folde
 
 Second, a set of helper utilities is available in the `micasense` folder that can be used both with these tutorials as well as separtely. 
 
-Note that some of the hyperlinks in the notebooks may give you a 404 Not Found error. This is because the links are setup to allow the list of files above to be accessed on the github.io site.  When running the notebooks, use your jupyter "home" tab to open different notebooks.
+Note that some of the hyperlinks in the notebooks may give you a 404 Not Found error. This is because the links are setup to allow the list of files above to be accessed on the github.io site.  When running the notebooks, use your jupyter "home" tab to open the different notebooks.
 
 ### Contribution guidelines
 
-Find a problem with the tutorial? Please look through the existing issues (open and closed) and if it's new, create an issue on github. 
+Find a problem with the tutorial? Please look through the existing issues (open and closed) and if it's new, [create an issue on github](https://github.com/micasense/imageprocessing/issues). 
 
 Want to correct an issue or expand library functionality?  Fork the repository, make your fix, and submit a pull request on github.
 
-Have a question? Double-check that you're able to run the setup notebook successfully, and then check the [MicaSense Knowledgebase](https://support.micasense.com) before contacting support.
+Have a question? Please double-check that you're able to run the setup notebook successfully, and resolve any issues with that first.  If you're pulling newer code, it may be necessary in some cases to delete and re-create your `micasense` conda environment to make sure you have all of the expected packages.  
+
+This code is a community effort and is not supported by MicaSense support. Please don't reach out to MicaSense support for issues with this codebase; instead, work through the above troubleshooting steps and then [create an issue on github](https://github.com/micasense/imageprocessing/issues).
 
 ### Tests
 
 Tests for many library functions are included in the `tests` diretory. Install the `pytest` module through your package manager (e.g. `pip install pytest`) and then tests can be run from the main directory using the command:
 
 ```bash
-pytest tests
+pytest .
 ```
 
 Data used by the tests is included in the `data` folder.

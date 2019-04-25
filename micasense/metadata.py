@@ -98,7 +98,9 @@ class Metadata(object):
             print("{}: {}".format(item, self.get_item(item)))
 
     def dls_present(self):
-        return self.get_item("XMP:Irradiance") is not None
+        return self.get_item("XMP:Irradiance") is not None \
+               or self.get_item("XMP:HorizontalIrradiance") is not None \
+               or self.get_item("XMP:DirectIrradiance is not None") is not None
 
     def supports_radiometric_calibration(self):
         if(self.get_item('XMP:RadiometricCalibration')) is None:
@@ -144,9 +146,6 @@ class Metadata(object):
         else:
             yaw = pitch = roll = 0.0
         return yaw, pitch, roll
-
-    def dls_irradiance(self):
-        return self.spectral_irradiance()
 
     def rig_relatives(self):
         if self.get_item('XMP:RigRelatives') is not None:
@@ -262,10 +261,11 @@ class Metadata(object):
         else:
             return 0.0
 
-    # due to calibration differences between DLS1 and DLS2, we need to account for a scale factor
-    # change in their respective units. This scale factor is pulled from the image metadata, or, if
-    # the metadata doesn't give us the scale, we assume one based on a known combination of tags
     def irradiance_scale_factor(self):
+        ''' Get the calibration scale factor for the irradiance measurements in this image metadata.
+            Due to calibration differences between DLS1 and DLS2, we need to account for a scale factor
+            change in their respective units. This scale factor is pulled from the image metadata, or, if
+            the metadata doesn't give us the scale, we assume one based on a known combination of tags'''
         if self.get_item('XMP:IrradianceScaleToSIUnits') is not None:
              # the metadata contains the scale
             scale_factor = self.__float_or_zero(self.get_item('XMP:IrradianceScaleToSIUnits'))
@@ -276,32 +276,59 @@ class Metadata(object):
             # DLS1, so we use a scale of 1
             scale_factor = 1.0
         return scale_factor
+    
+    def horizontal_irradiance_valid(self):
+        ''' Defines if horizontal irradiance tag contains a value that can be trusted
+            some firmware versions had a bug whereby the direct and scattered irradiance were correct,
+            but the horizontal irradiance was calculated incorrectly '''
+        if self.get_item('XMP:HorizontalIrradiance') is None:
+            return False
+        from packaging import version
+        version_string = self.firmware_version().strip('v')
+        if self.camera_model() == "Altum":
+            good_version = "1.2.3"
+        elif self.camera_model() == 'RedEdge' or self.camera_model() == 'RedEdge-M':
+            good_version = "5.1.7"
+        else:
+            raise ValueError("Camera model is required to be RedEdge or Altum, not {} ".format(self.camera_model()))
+        return version.parse(version_string) >= version.parse(good_version)
 
     def spectral_irradiance(self):
+        ''' Raw spectral irradiance measured by an irradiance sensor. 
+            Calibrated to W/m^2/nm using irradiance_scale_factor, but not corrected for angles '''
         return self.__float_or_zero(self.get_item('XMP:SpectralIrradiance'))*self.irradiance_scale_factor()
 
     def horizontal_irradiance(self):
+        ''' Horizontal irradiance at the earth's surface below the DLS on the plane normal to the gravity
+            vector at the location (local flat plane spectral irradiance) '''
         return self.__float_or_zero(self.get_item('XMP:HorizontalIrradiance'))*self.irradiance_scale_factor()
 
     def scattered_irradiance(self):
+        ''' scattered component of the spectral irradiance '''
         return self.__float_or_zero(self.get_item('XMP:ScatteredIrradiance'))*self.irradiance_scale_factor()
 
     def direct_irradiance(self):
+        ''' direct component of the spectral irradiance on a ploane normal to the vector towards the sun '''
         return self.__float_or_zero(self.get_item('XMP:DirectIrradiance'))*self.irradiance_scale_factor()
 
     def solar_azimuth(self):
+        ''' solar azimuth at the time of capture, as calculated by the camera system '''
         return self.__float_or_zero(self.get_item('XMP:SolarAzimuth'))
 
     def solar_elevation(self):
+        ''' solar elevation at the time of capture, as calculated by the camera system '''
         return self.__float_or_zero(self.get_item('XMP:SolarElevation'))
 
     def estimated_direct_vector(self):
+        ''' estimated direct light vector relative to the DLS2 reference frame'''
         if self.get_item('XMP:EstimatedDirectLightVector') is not None:
             return [self.__float_or_zero(item) for item in self.get_item('XMP:EstimatedDirectLightVector')]
         else:
             return None
 
     def auto_calibration_image(self):
+        ''' True if this image is an auto-calibration image, where the camera has found and idetified
+            a calibration panel '''
         cal_tag = self.get_item('XMP:CalibrationPicture')
         return cal_tag is not None and \
                cal_tag == 2 and \
@@ -310,17 +337,21 @@ class Metadata(object):
                self.panel_serial() is not None
 
     def panel_albedo(self):
+        ''' Surface albedo of the active portion of the reflectance panel as calculated by the camera 
+            (usually from the informatoin in the panel QR code) '''
         albedo = self.get_item('XMP:Albedo')
         if albedo is not None:
             return self.__float_or_zero(albedo)
         return albedo
 
     def panel_region(self):
+        ''' A 4-tuple containing image x,y coordinates of the panel active area '''
         if self.get_item('XMP:ReflectArea') is not None:
             coords = [int(item) for item in self.get_item('XMP:ReflectArea').split(',')]
             return list(zip(coords[0::2], coords[1::2]))
         else:
             return None
-
+    
     def panel_serial(self):
+        ''' The panel serial number as extracted from the image by the camera '''
         return self.get_item('XMP:PanelSerial')

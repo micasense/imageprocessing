@@ -113,7 +113,7 @@ def test_firmware_version_v3(meta_v3):
     assert meta_v3.firmware_version() == "v3.3.0"
 
 def test_dls_irradiance(meta):
-    assert meta.dls_irradiance() == pytest.approx(1.0848, abs=0.0001)
+    assert meta.spectral_irradiance() == pytest.approx(1.0848, abs=0.0001)
 
 def test_dls_pose(meta):
     assert meta.dls_pose() == pytest.approx((-3.070, -0.188, -0.013), abs=0.001)
@@ -130,5 +130,14 @@ def test_bad_exposure_time(meta_bad_exposure):
 def test_dls1_scale_factor(meta):
     assert meta.irradiance_scale_factor() == pytest.approx(1.0)
 
+def test_dls_present_dls2(meta_altum_dls2):
+    assert meta_altum_dls2.dls_present() == True
+    
 def test_dls2_scale_factor(meta_altum_dls2):
     assert meta_altum_dls2.irradiance_scale_factor() == pytest.approx(0.01)
+
+def test_horizontal_irradiance_valid(meta):
+    assert meta.horizontal_irradiance_valid() == False
+
+def test_horizontal_irradiance_valid_altum(meta_altum_dls2):
+    assert meta_altum_dls2.horizontal_irradiance_valid() == True

@@ -12,11 +12,14 @@ dependencies:
   - scikit-image
   - pytest
   - git
+  - git-lfs
   - pandas
   - imageio
   - nb_conda
   - requests
+  - packaging
   - pip:
     - pyzbar
     - mapboxgl
     - git+https://github.com/smarnach/pyexiftool.git#egg=pyexiftoolpy
+    - jenkspy
