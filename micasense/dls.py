@@ -33,6 +33,7 @@ import numpy as np
 import imp
 
 havePysolar = False
+
 try:
     import pysolar.solar as pysolar
     havePysolar = True
@@ -42,15 +43,13 @@ except ImportError:
         havePysolar = True
     except ImportError:
         import pysolar.solar as pysolar
-        havePysolar = True
+        havePysolar = True 
 finally: 
     if not havePysolar:
         print("Unable to import pysolar")
 
 def fresnel(phi):
-    # Calculate fresnel effects for MicaSense DLS
     return __multilayer_transmission(phi, n=[1.000277,1.6,1.38])
-    
 
 # define functions to compute the DLS-Sun angle:
 def __fresnel_transmission(phi, n1=1.000277, n2=1.38, polarization=[.5, .5]):
@@ -87,7 +86,7 @@ def __multilayer_transmission(phi, n, polarization=[.5, .5]):
 def ned_from_pysolar(sunAzimuth, sunAltitude):
     """Convert pysolar coordinates to NED coordinates."""
     elements = (
-        -np.cos(sunAzimuth) * np.cos(sunAltitude),
+        np.cos(sunAzimuth) * np.cos(sunAltitude),
         np.sin(sunAzimuth) * np.cos(sunAltitude),
         -np.sin(sunAltitude),
     )
@@ -138,9 +137,10 @@ def compute_sun_angle(
             azimuth = pysolar.get_azimuth(position[0], position[1], utc_datetime)
         except AttributeError: # catch 0.6 version of pysolar required for python 2.7 support
             altitude = pysolar.GetAltitude(position[0], position[1], utc_datetime)
-            azimuth = pysolar.GetAzimuth(position[0], position[1], utc_datetime)
+            azimuth = 180-pysolar.GetAzimuth(position[0], position[1], utc_datetime)
         sunAltitude = np.radians(np.array(altitude))
         sunAzimuth = np.radians(np.array(azimuth))
+        sunAzimuth = sunAzimuth % (2 * np.pi ) #wrap range 0 to 2*pi
         nSun = ned_from_pysolar(sunAzimuth, sunAltitude)
         nSensor = np.array(get_orientation(pose, sensor_orientation))
         angle = np.arccos(np.dot(nSun, nSensor))

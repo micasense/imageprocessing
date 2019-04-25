@@ -27,16 +27,77 @@ import pytest
 import os, glob
 import numpy as np
 import math
+import datetime
 
 import micasense.dls as dls
 import micasense.image as image
 
-@pytest.fixture()
-def img():
-    image_path = os.path.join('data','0000SET','000',)
-    return image.Image(os.path.join(image_path,'IMG_0000_1.tif'))
+# pysolar changed their coordinate system from South-based to north-based between 0.6 and 0.8
+# we add some tests here to help ensure we captured that change properly
+def test_ned_from_pysolar_north():
+    assert dls.ned_from_pysolar(0,np.radians(45)) == pytest.approx([0.707, 0, -0.707], 0.01)
 
-def test_sun_angle(img):
+def test_ned_from_pysolar_northeast():
+    assert dls.ned_from_pysolar(np.radians(45),np.radians(45)) == pytest.approx([0.50, 0.5, -0.707], 0.01)
+
+def test_ned_from_pysolar_east():
+    assert dls.ned_from_pysolar(np.radians(90),np.radians(45)) == pytest.approx([0, 0.707, -0.707], 0.01)
+
+def test_ned_from_pysolar_southeast():
+    assert dls.ned_from_pysolar(np.radians(135),np.radians(45)) == pytest.approx([-0.50, 0.5, -0.707], 0.01)
+
+def test_ned_from_pysolar_south():
+    assert dls.ned_from_pysolar(np.radians(180),np.radians(45)) == pytest.approx([-0.707, 0, -0.707], 0.01)
+
+def test_ned_from_pysolar_southwest():
+    assert dls.ned_from_pysolar(np.radians(225),np.radians(45)) == pytest.approx([-0.50, -0.5, -0.707], 0.01)
+
+def test_ned_from_pysolar_west():
+    assert dls.ned_from_pysolar(np.radians(270),np.radians(45)) == pytest.approx([0,-0.707,-0.707], 0.01)
+
+def test_ned_from_pysolar_northwest():
+    assert dls.ned_from_pysolar(np.radians(315),np.radians(45)) == pytest.approx([0.50, -0.5, -0.707], 0.01)
+
+def test_pysolar_az_el_vs_usno():
+    # for simplicity's sake, let's pick a couple places on the prime meridian on the vernal equinox,
+    #  and test those vs the USNO
+    # https://aa.usno.navy.mil/rstt/onedaytable?ID=AA&year=2019&month=3&day=20&place=&lon_sign=-1&lon_deg=0&lon_min=0&lat_sign=1&lat_deg=51&lat_min=28&tz=0&tz_sign=-1
+    lat = 51.4769  #greenwich observatory
+    lon = 0
+    dt = datetime.datetime(2019,3,21,12,8,0,tzinfo=datetime.timezone.utc)
+    _,_,angle,sunAltitude,sunAzimuth = dls.compute_sun_angle((lat, lon, 0),
+                                      (0,0,0),
+                                      dt,
+                                      np.array([0,0,-1]))
+    assert angle == pytest.approx(math.radians(lat), abs=0.01)
+    assert sunAltitude == pytest.approx(math.radians(90-lat), abs=0.01)
+    assert sunAzimuth == pytest.approx(math.pi, abs=0.01)
+
+    #for simplicity's sake, let's pick a couple places on the prime meridian on the vernal equinox
+    lat = 0
+    lon = 0
+    dt = datetime.datetime(2019,3,20,12,8,0,tzinfo=datetime.timezone.utc)
+    _,_,angle,sunAltitude,sunAzimuth = dls.compute_sun_angle((lat, lon, 0),
+                                      (0,0,0),
+                                      dt,
+                                      np.array([0,0,-1]))
+    assert angle == pytest.approx(math.radians(lat), abs=0.01)
+    assert sunAltitude == pytest.approx(math.radians(90-lat), abs=0.01)
+    #assert sunAzimuth == pytest.approx(math.pi, abs=0.01) # should be straight up, at the equator, don't test elevation
+
+    # middle of the ocean at 45deg sout latitutde
+    lat = -45
+    lon = 0
+    dt = datetime.datetime(2019,3,20,12,8,0,tzinfo=datetime.timezone.utc)
+    _,_,angle,sunAltitude,sunAzimuth = dls.compute_sun_angle((lat, lon, 0),
+                                      (0,0,0),
+                                      dt,
+                                      np.array([0,0,-1]))
+    assert angle == pytest.approx(math.radians(math.fabs(lat)), abs=0.01)
+    assert sunAltitude == pytest.approx(math.radians(90+lat), abs=0.01)
+    assert sunAzimuth == pytest.approx(2*math.pi, abs=0.01) # should be due north
+
+def test_sun_angle_image(img):
     if dls.havePysolar:
         sun_angle = dls.compute_sun_angle((img.latitude, img.longitude, img.altitude),
                                           (img.dls_yaw, img.dls_pitch, img.dls_roll),
@@ -46,7 +107,7 @@ def test_sun_angle(img):
         assert sun_angle[1] == pytest.approx([-1.87482468e-01,  1.82720334e-05, -9.82267949e-01], abs=0.001)
         assert sun_angle[2] == pytest.approx(0.6754, abs=0.001)
         assert sun_angle[3] == pytest.approx(0.7193, abs=0.001)
-        assert sun_angle[4] == pytest.approx(-0.334, abs=0.001)
+        assert sun_angle[4] == pytest.approx(3.4756, abs=0.001)
     else:
         assert True
 

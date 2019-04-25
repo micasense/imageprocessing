@@ -35,18 +35,41 @@ import matplotlib.pyplot as plt
 import micasense.plotutils as plotutils
 import micasense.metadata as metadata
 
+#helper function to convert euler angles to a rotation matrix
+def rotations_degrees_to_rotation_matrix(rotation_degrees):
+   cx = np.cos(np.deg2rad(rotation_degrees[0]))
+   cy = np.cos(np.deg2rad(rotation_degrees[1]))
+   cz = np.cos(np.deg2rad(rotation_degrees[2]))
+   sx = np.sin(np.deg2rad(rotation_degrees[0]))
+   sy = np.sin(np.deg2rad(rotation_degrees[1]))
+   sz = np.sin(np.deg2rad(rotation_degrees[2]))
+
+   Rx = np.mat([  1,  0,  0,
+                  0, cx,-sx,
+                  0, sx, cx]).reshape(3,3)
+   Ry = np.mat([ cy,  0, sy,
+                  0,  1,  0,
+                -sy,  0, cy]).reshape(3,3)
+   Rz = np.mat([ cz,-sz,  0,
+                 sz, cz,  0,
+                  0,  0,  1]).reshape(3,3)
+   R = Rx*Ry*Rz
+   return R
+
 class Image(object):
     """
     An Image is a single file taken by a RedEdge camera representing one
     band of multispectral information
     """
-    def __init__(self, image_path):
+    def __init__(self, image_path, exiftool_obj=None):
         if not os.path.isfile(image_path):
             raise IOError("Provided path is not a file: {}".format(image_path))
         self.path = image_path
-        self.meta = metadata.Metadata(self.path)
+        self.meta = metadata.Metadata(self.path, exiftool_obj=exiftool_obj)
 
-        if not self.meta.supports_radiometric_calibration():
+        if self.meta.band_name() is None:
+            raise ValueError("Provided file path does not have a band name: {}".format(image_path))
+        if self.meta.band_name().upper() != 'LWIR' and not self.meta.supports_radiometric_calibration():
             raise ValueError('Library requires images taken with camera firmware v2.1.0 or later. ' +
             'Upgrade your camera firmware to use this library.')
 
@@ -60,7 +83,8 @@ class Image(object):
         self.band_name = self.meta.band_name()
         self.band_index = self.meta.band_index()
         self.black_level = self.meta.black_level()
-        self.radiometric_cal = self.meta.radiometric_cal()
+        if self.meta.supports_radiometric_calibration():
+            self.radiometric_cal = self.meta.radiometric_cal()
         self.exposure_time = self.meta.exposure()
         self.gain = self.meta.gain()
         self.bits_per_pixel = self.meta.bits_per_pixel()
@@ -72,7 +96,19 @@ class Image(object):
         self.focal_length = self.meta.focal_length_mm()
         self.center_wavelength = self.meta.center_wavelength()
         self.bandwidth = self.meta.bandwidth()
-
+        self.rig_relatives = self.meta.rig_relatives()
+        self.spectral_irradiance = self.meta.spectral_irradiance()
+        self.horizontal_irradiance = self.meta.horizontal_irradiance()
+        self.scattered_irradiance = self.meta.scattered_irradiance()
+        self.direct_irradiance = self.meta.direct_irradiance()
+        self.solar_azimuth = self.meta.solar_azimuth()
+        self.solar_elevation = self.meta.solar_elevation()
+        self.estimated_direct_vector = self.meta.estimated_direct_vector()
+        self.auto_calibration_image = self.meta.auto_calibration_image()
+        self.panel_albedo = self.meta.panel_albedo()
+        self.panel_region = self.meta.panel_region()
+        self.panel_serial = self.meta.panel_serial()
+        
         if self.bits_per_pixel != 16:
             NotImplemented("Unsupported pixel bit depth: {} bits".format(self.bits_per_pixel))
 
@@ -86,10 +122,10 @@ class Image(object):
 
     def __lt__(self, other):
         return self.band_index < other.band_index
-    
+
     def __gt__(self, other):
         return self.band_index > other.band_index
-    
+
     def __eq__(self, other):
         return (self.band_index == other.band_index) and \
                (self.capture_id == other.capture_id)
@@ -107,7 +143,19 @@ class Image(object):
                 print("Could not open image at path {}".format(self.path))
                 raise
         return self.__raw_image
-            
+
+    def set_external_rig_relatives(self,external_rig_relatives):
+        self.rig_translations = external_rig_relatives['rig_translations']
+        #external rig relatives are in rad
+        self.rig_relatives = [np.rad2deg(a) for a in external_rig_relatives['rig_relatives']]
+        px,py = external_rig_relatives['cx'],external_rig_relatives['cy']
+        fx,fy = external_rig_relatives['fx'],external_rig_relatives['fy']
+        rx = self.focal_plane_resolution_px_per_mm[0]
+        ry = self.focal_plane_resolution_px_per_mm[1]
+        self.principal_point = [px/rx,py/ry]
+        self.focal_length = (fx+fy)*.5/rx
+        #to do - set the distortion etc.
+
     def clear_image_data(self):
         ''' clear all computed images to reduce memory overhead '''
         self.__raw_image = None
@@ -128,15 +176,21 @@ class Image(object):
             and force_recompute == False \
             and (self.__reflectance_irradiance == irradiance or irradiance == None):
             return self.__reflectance_image
-        if irradiance is None:
-            raise RuntimeError("Provide a band-specific spectral irradiance to compute reflectance")
-        self.__reflectance_irradiance = irradiance
-        self.__reflectance_image = self.radiance() * math.pi / irradiance
+        if irradiance is None and self.band_name != 'LWIR':
+            if self.horizontal_irradiance != 0.0:
+                irradiance = self.horizontal_irradiance
+            else:
+                raise RuntimeError("Provide a band-specific spectral irradiance to compute reflectance")
+        if self.band_name != 'LWIR':
+            self.__reflectance_irradiance = irradiance
+            self.__reflectance_image = self.radiance() * math.pi / irradiance
+        else:
+            self.__reflectance_image = self.radiance()
         return self.__reflectance_image
 
     def intensity(self, force_recompute=False):
         ''' Lazy=computes and returns the intensity image after black level,
-            vignette, and row correction applied. 
+            vignette, and row correction applied.
             Intensity is in units of DN*Seconds without a radiance correction '''
         if self.__intensity_image is not None and force_recompute == False:
             return self.__intensity_image
@@ -167,17 +221,19 @@ class Image(object):
         # get image dimensions
         image_raw = np.copy(self.raw()).T
 
-        #  get radiometric calibration factors
-        a1, a2, a3 = self.radiometric_cal[0], self.radiometric_cal[1], self.radiometric_cal[2]
-
-        # apply image correction methods to raw image
-        V, x, y = self.vignette()
-        R = 1.0 / (1.0 + a2 * y / self.exposure_time - a3 * y)
-        L = V * R * (image_raw - self.black_level)
-        L[L < 0] = 0
-        max_raw_dn = float(2**self.bits_per_pixel)
-        radiance_image = L.astype(float)/(self.gain * self.exposure_time)*a1/max_raw_dn
-
+        if(self.band_name != 'LWIR'):
+            #  get radiometric calibration factors
+            a1, a2, a3 = self.radiometric_cal[0], self.radiometric_cal[1], self.radiometric_cal[2]
+            # apply image correction methods to raw image
+            V, x, y = self.vignette()
+            R = 1.0 / (1.0 + a2 * y / self.exposure_time - a3 * y)
+            L = V * R * (image_raw - self.black_level)
+            L[L < 0] = 0
+            max_raw_dn = float(2**self.bits_per_pixel)
+            radiance_image = L.astype(float)/(self.gain * self.exposure_time)*a1/max_raw_dn
+        else:
+            L = image_raw - (273.15*100.0) # convert to C from K
+            radiance_image = L.astype(float) * 0.01
         self.__radiance_image = radiance_image.T
         return self.__radiance_image
 
@@ -214,10 +270,16 @@ class Image(object):
         # corrected image is image_corrected = image_original * vignetteCorrection
         vignette = 1./np.polyval(v_polynomial, r)
         return vignette, x, y
-    
+
+    def undistorted_radiance(self, force_recompute=False):
+        return self.undistorted(self.radiance(force_recompute))
+
+    def undistorted_reflectance(self, irradiance=None, force_recompute=False):
+        return self.undistorted(self.reflectance(irradiance, force_recompute))
+
     def plottable_vignette(self):
         return self.vignette()[0].T
-    
+
     def cv2_distortion_coeff(self):
         #dist_coeffs = np.array(k[0],k[1],p[0],p[1],k[2]])
         return np.array(self.distortion_parameters)[[0, 1, 3, 4, 2]]
@@ -242,18 +304,27 @@ class Image(object):
         # set up distortion coefficients for cv2
         return cam_mat
 
+    def rig_xy_offset_in_px(self):
+        pixel_pitch_mm_x = 1.0/self.focal_plane_resolution_px_per_mm[0]
+        pixel_pitch_mm_y = 1.0/self.focal_plane_resolution_px_per_mm[1]
+        px_fov_x = 2.0 * math.atan2(pixel_pitch_mm_x/2.0, self.focal_length)
+        px_fov_y = 2.0 * math.atan2(pixel_pitch_mm_y/2.0, self.focal_length)
+        t_x = math.radians(self.rig_relatives[0]) / px_fov_x
+        t_y = math.radians(self.rig_relatives[1]) / px_fov_y
+        return (t_x, t_y)
+
     def undistorted(self, image):
         ''' return the undistorted image from input image '''
         # If we have already undistorted the same source, just return that here
         # otherwise, lazy compute the undstorted image
         if self.__undistorted_source is not None and image.data == self.__undistorted_source.data:
             return self.__undistorted_image
-        
+
         self.__undistorted_source = image
 
-        new_cam_mat, _ = cv2.getOptimalNewCameraMatrix(self.cv2_camera_matrix(), 
+        new_cam_mat, _ = cv2.getOptimalNewCameraMatrix(self.cv2_camera_matrix(),
                                                        self.cv2_distortion_coeff(),
-                                                       self.size(), 
+                                                       self.size(),
                                                        1)
         map1, map2 = cv2.initUndistortRectifyMap(self.cv2_camera_matrix(),
                                                 self.cv2_distortion_coeff(),
@@ -302,3 +373,35 @@ class Image(object):
         titles = ['{} Band {} {}'.format(str(self.band_name), str(self.band_index), tpe)
                  for tpe in plot_types]
         plotutils.subplotwithcolorbar(2, 2, plots, titles, figsize=figsize)
+
+        #get the homography that maps from this image to the reference image
+    def get_homography(self,ref,R=None,T=None):
+        #if we have externally supplied rotations/translations for the rig use these
+        # otherwise use the rig-relatives intrinsic to the image
+        if R is None:
+            R = rotations_degrees_to_rotation_matrix(self.rig_relatives)
+        if T is None:
+            T =np.zeros(3)
+
+        A = np.zeros((4,4))
+        A[0:3,0:3]=R
+        A[0:3,3]=T
+        A[3,3]=1.
+        C, _ = cv2.getOptimalNewCameraMatrix(self.cv2_camera_matrix(),
+                                             self.cv2_distortion_coeff(),
+                                             self.size(),1)
+        Cr, _ = cv2.getOptimalNewCameraMatrix(ref.cv2_camera_matrix(),
+                                              ref.cv2_distortion_coeff(),
+                                              ref.size(),1)
+        CC = np.zeros((4,4))
+        CC[0:3,0:3] = C
+        CC[3,3]=1.
+        CCr = np.zeros((4,4))
+        CCr[0:3,0:3] = Cr
+        CCr[3,3]=1.
+
+        B = np.array(np.dot(CCr,np.dot(A,np.linalg.inv(CC))))
+        B[:,2]=B[:,2]-B[:,3]
+        B = B[0:3,0:3]
+        B = B/B[2,2]
+        return np.array(B)
