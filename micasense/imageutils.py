@@ -157,8 +157,7 @@ def align(pair):
                 plotutils.plotwithcolorbar(grad2, "match grad level {}".format(level))
                 print("Starting warp for level {} is:\n {}".format(level,warp_matrix))
 
-            cc, warp_matrix = cv2.findTransformECC(grad1, grad2,
-                                            warp_matrix, warp_mode, criteria)
+            cc, warp_matrix = cv2.findTransformECC(grad1, grad2, warp_matrix, warp_mode, criteria)
 
             if show_debug_images:
                 print("Warp after alignment level {} is \n{}".format(level,warp_matrix))
@@ -175,6 +174,12 @@ def align(pair):
             'match_index': pair['match_index'],
             'warp_matrix': warp_matrix }
 
+def default_warp_matrix(warp_mode):
+    if warp_mode == cv2.MOTION_HOMOGRAPHY:
+        return np.array([[1,0,0],[0,1,0],[0,0,1]], dtype=np.float32)
+    else:
+        return np.array([[1,0,0],[0,1,0]], dtype=np.float32)
+
 def align_capture(capture, ref_index=1, warp_mode=cv2.MOTION_HOMOGRAPHY, max_iterations=2500, epsilon_threshold=1e-9, multithreaded=True, debug=False, pyramid_levels = None):
     '''Align images in a capture using openCV
     MOTION_TRANSLATION sets a translational motion model; warpMatrix is 2x3 with the first 2x2 part being the unity matrix and the rest two parameters being estimated.
@@ -186,8 +191,11 @@ def align_capture(capture, ref_index=1, warp_mode=cv2.MOTION_HOMOGRAPHY, max_ite
     # Match other bands to this reference image (index into capture.images[])
     ref_img = capture.images[ref_index].undistorted(capture.images[ref_index].radiance()).astype('float32')
     
-    warp_matrices_init = capture.get_warp_matrices(ref_index=ref_index)
-
+    if capture.has_rig_relatives():
+        warp_matrices_init = capture.get_warp_matrices(ref_index=ref_index)
+    else:
+        warp_matrices_init = [default_warp_matrix(warp_mode)]*len(capture.images)
+    
     alignment_pairs = []
     for i,img in enumerate(capture.images):
         if img.rig_relatives is not None:

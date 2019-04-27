@@ -222,3 +222,10 @@ def test_rgb_jpg_decimation(aligned_altum_capture, tmpdir):
 
     if tmpdir.check():
         tmpdir.remove()
+
+def test_has_rig_relatives(non_panel_altum_capture):
+    assert non_panel_altum_capture.has_rig_relatives() == True
+
+def test_no_rig_relatives(non_panel_rededge_file_list):
+    cap = capture.Capture.from_filelist(non_panel_rededge_file_list)
+    assert cap.has_rig_relatives() == False
