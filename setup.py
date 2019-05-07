@@ -30,6 +30,7 @@ setup(name='micasense',
           'pysolar',
           'matplotlib',
           'scikit-image',
+          'packaging',
           'pyexiftool',
           'pytz',
           'pyzbar'
