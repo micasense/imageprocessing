@@ -255,6 +255,9 @@ class Metadata(object):
             focal_length_mm = focal_length_px / self.focal_plane_resolution_px_per_mm()[0]
         return focal_length_mm
 
+    def focal_length_35_mm_eq(self):
+        return float(self.get_item('Composite:FocalLength35efl'))
+
     def __float_or_zero(self, str):
         if str is not None:
             return float(str)
