@@ -92,13 +92,14 @@ class Image(object):
 
         if self.bits_per_pixel != 16:
             NotImplemented("Unsupported pixel bit depth: {} bits".format(self.bits_per_pixel))
-        
+
         self.vignette_center = self.meta.vignette_center()
         self.vignette_polynomial = self.meta.vignette_polynomial()
         self.distortion_parameters = self.meta.distortion_parameters()
         self.principal_point = self.meta.principal_point()
         self.focal_plane_resolution_px_per_mm = self.meta.focal_plane_resolution_px_per_mm()
         self.focal_length = self.meta.focal_length_mm()
+        self.focal_length_35 = self.meta.focal_length_35_mm_eq()
         self.center_wavelength = self.meta.center_wavelength()
         self.bandwidth = self.meta.bandwidth()
         self.rig_relatives = self.meta.rig_relatives()
