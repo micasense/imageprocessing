@@ -312,7 +312,13 @@ class Capture(object):
     def set_external_rig_relatives(self,external_rig_relatives):
         for i,img in enumerate(self.images):
             img.set_external_rig_relatives(external_rig_relatives[str(i)])
-
+    
+    def has_rig_relatives(self):
+        for img in self.images:
+            if img.meta.rig_relatives() is None:
+                return False
+        return True
+        
     def get_warp_matrices(self, ref_index=None):
         if ref_index is None:
             ref = self.images[self.__get_reference_index()]
