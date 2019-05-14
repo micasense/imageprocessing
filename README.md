@@ -18,9 +18,9 @@ For a user of RedEdge or Altum that wants a turnkey processing solution, this re
 
 ### How do I get set up?
 
-First, `git clone` this repository, as it has all of the code and examples you'll need.
+First you'll need to install [git](https://git-scm.com/downloads) and [git-lfs](https://git-lfs.github.com/).  Install both before running `git clone` or you may have issues with the example data files included.
 
-To do that you'll need [git](https://git-scm.com/downloads)
+Next, `git clone` this repository, as it has all of the code and examples you'll need.
 
 Once you have git installed and the repository cloned, you are ready to start with the first tutorial. Check out the [setup tutorial](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Setup.html) which will walk through installing and checking the necessary tools to run the remaining tutorials.
 
