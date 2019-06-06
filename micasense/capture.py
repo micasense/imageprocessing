@@ -281,7 +281,7 @@ class Capture(object):
 
     def panel_albedo(self):
         if self.panels is not None:
-            return [img.reflectance_from_panel_serial() for img in self.images]
+            return [panel.reflectance_from_panel_serial() for panel in self.panels]
         else:
             return None
 

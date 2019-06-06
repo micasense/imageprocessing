@@ -229,3 +229,8 @@ def test_has_rig_relatives(non_panel_altum_capture):
 def test_no_rig_relatives(non_panel_rededge_file_list):
     cap = capture.Capture.from_filelist(non_panel_rededge_file_list)
     assert cap.has_rig_relatives() == False
+
+def test_panel_albedo(panel_altum_capture):
+    panel_altum_capture.detect_panels()
+    good_panel_albedo = [0.5282, 0.5274, 0.5263, 0.5246, 0.5258]
+    assert panel_altum_capture.panel_albedo() == pytest.approx(good_panel_albedo, 1e-4)
