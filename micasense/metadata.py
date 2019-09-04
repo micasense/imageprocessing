@@ -177,8 +177,10 @@ class Metadata(object):
 
     def exposure(self):
         exp = self.get_item('EXIF:ExposureTime')
-        if math.fabs(exp-(1.0/6329.0)) < 0.0001:
-            exp = 0.000274
+        # correct for incorrect exposure in some legacy RedEdge firmware versions
+        if self.camera_model() != "Altum":
+            if math.fabs(exp-(1.0/6329.0)) < 1e-6: 
+                exp = 0.000274
         return exp
 
     def gain(self):
