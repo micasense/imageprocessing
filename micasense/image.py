@@ -209,6 +209,9 @@ class Image(object):
         ''' Lazy load the raw image once neecessary '''
         if self.__raw_image is None:
             try:
+                import rawpy
+                self.__raw_image = rawpy.imread(self.path).raw_image
+            except ImportError:
                 self.__raw_image = cv2.imread(self.path,-1)
             except IOError:
                 print("Could not open image at path {}".format(self.path))
