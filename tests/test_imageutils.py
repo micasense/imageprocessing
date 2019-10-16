@@ -74,6 +74,8 @@ truth_camera_matrices = [array([[2.24343510e+03, 0.00000000e+00, 1.01295942e+03]
        [  0.        , 162.63769993,  56.92766664],
        [  0.        ,   0.        ,   1.        ]])]
 
+expected_dimensions = (21.0, 12.0, 2035.0, 1467.0)
+
 def test_image_properties(non_panel_altum_capture):
     for i,image in enumerate(non_panel_altum_capture.images):
         assert(image.size() == pytest.approx(truth_image_sizes[i]))
@@ -89,7 +91,7 @@ def test_cropping(non_panel_altum_capture):
     warp_mode = cv2.MOTION_HOMOGRAPHY
     warp_matrices = non_panel_altum_capture.get_warp_matrices()
     cropped_dimensions,edges = imageutils.find_crop_bounds(non_panel_altum_capture,warp_matrices)
-    assert(cropped_dimensions == (21.0, 12.0, 2036.0, 1468.0))
+    assert(cropped_dimensions == expected_dimensions)
 
 
 

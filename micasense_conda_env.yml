@@ -1,9 +1,9 @@
-name: micasense
+name: micasense_test
 channels:
   - conda-forge
 dependencies:
   - python=3
-  - opencv=3
+  - opencv<3.4.7
   - numpy
   - jupyter
   - matplotlib
