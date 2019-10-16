@@ -24,3 +24,4 @@ dependencies:
     - mapboxgl
     - git+https://github.com/smarnach/pyexiftool.git#egg=pyexiftoolpy
     - jenkspy
+    - rawpy
