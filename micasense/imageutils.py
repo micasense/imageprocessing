@@ -157,8 +157,11 @@ def align(pair):
                 plotutils.plotwithcolorbar(grad2, "match grad level {}".format(level))
                 print("Starting warp for level {} is:\n {}".format(level,warp_matrix))
 
-            cc, warp_matrix = cv2.findTransformECC(grad1, grad2, warp_matrix, warp_mode, criteria)
-
+            try:
+                cc, warp_matrix = cv2.findTransformECC(grad1, grad2, warp_matrix, warp_mode, criteria, inputMask=None, gaussFiltSize=1)
+            except TypeError:
+                cc, warp_matrix = cv2.findTransformECC(grad1, grad2, warp_matrix, warp_mode, criteria)
+            
             if show_debug_images:
                 print("Warp after alignment level {} is \n{}".format(level,warp_matrix))
 
@@ -320,14 +323,14 @@ def find_crop_bounds(capture,registration_transforms,warp_mode=cv2.MOTION_HOMOGR
     lens_distortions = [image.cv2_distortion_coeff() for image in capture.images]
     camera_matrices =  [image.cv2_camera_matrix() for image in capture.images]
 
-    bounds = [get_inner_rect(s, a, d, c,warp_mode=warp_mode)[0] for s,a, d, c in zip(image_sizes,registration_transforms, lens_distortions, camera_matrices)]
-    edges = [get_inner_rect(s, a, d, c,warp_mode=warp_mode)[1] for s,a, d, c in zip(image_sizes,registration_transforms, lens_distortions, camera_matrices)]
+    bounds = [get_inner_rect(s, a, d, c,warp_mode=warp_mode)[0] for s, a, d, c in zip(image_sizes,registration_transforms, lens_distortions, camera_matrices)]
+    edges = [get_inner_rect(s, a, d, c,warp_mode=warp_mode)[1] for s, a, d, c in zip(image_sizes,registration_transforms, lens_distortions, camera_matrices)]
     combined_bounds = get_combined_bounds(bounds, image_sizes[0])
 
-    left = round(combined_bounds.min.x)
-    top = round(combined_bounds.min.y)
-    width = round(combined_bounds.max.x - combined_bounds.min.x + 0.5)
-    height = round(combined_bounds.max.y - combined_bounds.min.y + 0.5)
+    left = np.ceil(combined_bounds.min.x)
+    top = np.ceil(combined_bounds.min.y)
+    width = np.floor(combined_bounds.max.x - combined_bounds.min.x)
+    height = np.floor(combined_bounds.max.y - combined_bounds.min.y)
     return (left, top, width, height),edges
 
 def get_inner_rect(image_size, affine, distortion_coeffs, camera_matrix,warp_mode=cv2.MOTION_HOMOGRAPHY):
@@ -399,15 +402,16 @@ def min_max(pts):
     return bounds
 
 def map_points(pts, image_size, warpMatrix, distortion_coeffs, camera_matrix,warp_mode=cv2.MOTION_HOMOGRAPHY):
-    #assert len(affine) == 6, "affine must have len == 6, has len {}".format(len(affine))
-
     # extra dimension makes opencv happy
     pts = np.array([pts], dtype=np.float)
-
     new_cam_mat, _ = cv2.getOptimalNewCameraMatrix(camera_matrix, distortion_coeffs, image_size, 1)
     new_pts = cv2.undistortPoints(pts, camera_matrix, distortion_coeffs, P=new_cam_mat)
     if warp_mode == cv2.MOTION_AFFINE:
         new_pts = cv2.transform(new_pts, cv2.invertAffineTransform(warpMatrix))
     if warp_mode == cv2.MOTION_HOMOGRAPHY:
         new_pts =cv2.perspectiveTransform(new_pts,np.linalg.inv(warpMatrix).astype(np.float32))
-    return new_pts[0]
+    #apparently the output order has changed in 4.1.1 (possibly earlier from 3.4.3)
+    if cv2.__version__<='3.4.4':
+        return new_pts[0]
+    else:
+        return new_pts[:,0,:]
