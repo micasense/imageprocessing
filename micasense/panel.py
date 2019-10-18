@@ -81,7 +81,7 @@ class Panel(object):
         decoded = pyzbar.decode(self.gray8b, symbols=[pyzbar.ZBarSymbol.QRCODE])
         for symbol in decoded:
             serial_str = symbol.data.decode('UTF-8')
-            m = re.search('RP\d{2}-(\d{7})-\D{2}', serial_str)
+            m = re.search(r'RP\d{2}-(\d{7})-\D{2}', serial_str)
             if m:
                 self.serial = serial_str
                 self.panel_version = int(self.serial[2:4])
