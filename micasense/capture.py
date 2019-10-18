@@ -415,14 +415,14 @@ class Capture(object):
         else:
             imageio.imwrite(outfilename, (255*unsharp_rgb).astype('uint8'))
     
-    def save_thermal_over_rgb(self, outfilename):
+    def save_thermal_over_rgb(self, outfilename, figsize=(30,23)):
         if self.__aligned_capture is None:
             raise RuntimeError("call Capture.create_aligned_capture prior to saving as RGB")
         
         # by default we don't mask the thermal, since it's native resolution is much lower than the MS
         masked_thermal = self.__aligned_capture[:,:,5]
         
-        im_display = np.zeros((self.__aligned_capture.shape[0],self.__aligned_capture.shape[1],self.__aligned_capture.shape[2]), dtype=np.float32 )
+        im_display = np.zeros((self.__aligned_capture.shape[0],self.__aligned_capture.shape[1],3), dtype=np.float32 )
         rgb_band_indices = [2,1,0]
         hist_min_percent = 0.2
         hist_max_percent = 99.8
@@ -430,8 +430,8 @@ class Capture(object):
         # maintain the "white balance" of the calibrated image  
         im_min = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_min_percent)  # modify these percentiles to adjust contrast
         im_max = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_max_percent)  # for many images, 0.5 and 99.5 are good values
-        for i in rgb_band_indices:
-            im_display[:,:,i] =  imageutils.normalize(self.__aligned_capture[:,:,i], im_min, im_max)
+        for dst_band,src_band in enumerate(rgb_band_indices):
+            im_display[:,:,dst_band] =  imageutils.normalize(self.__aligned_capture[:,:,src_band], im_min, im_max)
        
         # Compute a histogram
         min_display_therm = np.percentile(masked_thermal, 1)
@@ -448,5 +448,6 @@ class Capture(object):
                                             display_contours=True,
                                             contour_steps=16,
                                             contour_alpha=.4,
-                                            contour_fmt="%.0fC")
+                                            contour_fmt="%.0fC",
+                                            show=False)
         fig.savefig(outfilename)
