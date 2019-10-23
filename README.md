@@ -2,7 +2,9 @@
 
 ### MicaSense RedEdge Image Processing Tutorials 
 
-This repository includes tutorials and examples for processing MicaSense RedEdge and Altum images into usable information using the python programming language.  The intended audience is researchers and developers with some software development experience that want to do their own image processing.  While a number of commercial tools fully support processing RedEdge data into reflectance maps, there are a number of reasons to process your own data, including controlling the entire radiometric workflow (for academic or publication reasons), pre-processing images to be used in a non-radiometric photogrammetry suite, or processing single sets of 5 images without building a larger map.
+This repository includes tutorials and examples for processing MicaSense RedEdge and Altum images into usable information using the python programming language. RedEdge images captured with firmware 2.1.0 (released June 2017) or newer are required. Altum images captured with all firmware versions are supported.
+
+The intended audience is researchers and developers with some software development experience that want to do their own image processing.  While a number of commercial tools fully support processing RedEdge data into reflectance maps, there are a number of reasons to process your own data, including controlling the entire radiometric workflow (for academic or publication reasons), pre-processing images to be used in a non-radiometric photogrammetry suite, or processing single sets of 5 images without building a larger map.
 
 ### What do I need to succeed?
 
@@ -29,7 +31,7 @@ Once you have git installed and the repository cloned, you are ready to start wi
 
 In addition to the tutorials, we've created library code that shows some common transformations, usages, and applications of RedEdge imagery.  In general, these are intended for developers that are familiar with installing and managing python packages and third party software.  The purpose of this code is readability and clarity to help others develop processing workflows, therefore performance may not be optimal.
 
-While this code is similar to an installable python library (and we may support the `pip install` process in the future) the main purpose of this library is one of documentation and education. For this reason, we expect most users to be looking at the source code for understanding or improvement, and because of this you will currently need to run your notebooks from the directory you `git clone`d it into. 
+While this code is similar to an installable python library (and supports a local the `python setup.py install` process) the main purpose of this library is one of documentation and education. For this reason, we expect most users to be looking at the source code for understanding or improvement, so they will run the notebooks from the directory that the library was `git clone`d it into. 
 
 ### Running this code
 
@@ -77,7 +79,7 @@ jupyter nbconvert --to html --ExecutePreprocessor.timeout=None --output-dir docs
 
 The MIT License (MIT)
 
-Copyright (c) 2017 MicaSense, Inc.
+Copyright (c) 2017-2019 MicaSense, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
