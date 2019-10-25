@@ -79,7 +79,7 @@ class Capture(object):
 
     def append_file(self, file_name):
         self.append_image(image.Image(file_name))
-    
+
     @classmethod
     def from_file(cls, file_name):
         return cls(image.Image(file_name))
@@ -312,13 +312,13 @@ class Capture(object):
     def set_external_rig_relatives(self,external_rig_relatives):
         for i,img in enumerate(self.images):
             img.set_external_rig_relatives(external_rig_relatives[str(i)])
-    
+
     def has_rig_relatives(self):
         for img in self.images:
             if img.meta.rig_relatives() is None:
                 return False
         return True
-        
+
     def get_warp_matrices(self, ref_index=None):
         if ref_index is None:
             ref = self.images[self.__get_reference_index()]
@@ -327,7 +327,7 @@ class Capture(object):
         warp_matrices  =[np.linalg.inv(im.get_homography(ref)) for im in self.images]
         return [w/w[2,2] for w in warp_matrices]
 
-    def create_aligned_capture(self, irradiance_list=None, warp_matrices=None, normalize=False, img_type=None):
+    def create_aligned_capture(self, irradiance_list=None, warp_matrices=None, normalize=False, img_type=None, motion_type=cv2.MOTION_HOMOGRAPHY):
         if img_type is None and irradiance_list is None and self.dls_irradiance() is None:
             self.compute_undistorted_radiance()
             img_type = 'radiance'
@@ -338,12 +338,12 @@ class Capture(object):
             img_type = 'reflectance'
         if warp_matrices is None:
             warp_matrices = self.get_warp_matrices()
-        cropped_dimensions,_ = imageutils.find_crop_bounds(self,warp_matrices)
-        self.__aligned_capture = imageutils.aligned_capture(self, 
-                                                warp_matrices, 
-                                                cv2.MOTION_HOMOGRAPHY, 
-                                                cropped_dimensions, 
-                                                None, 
+        cropped_dimensions,_ = imageutils.find_crop_bounds(self,warp_matrices,warp_mode=motion_type)
+        self.__aligned_capture = imageutils.aligned_capture(self,
+                                                warp_matrices,
+                                                motion_type,
+                                                cropped_dimensions,
+                                                None,
                                                 img_type=img_type)
         return self.__aligned_capture
 
@@ -379,7 +379,7 @@ class Capture(object):
             outband.FlushCache()
         outRaster = None
 
-    def save_capture_as_rgb(self, outfilename, gamma=1.4, downsample=1, white_balance='norm', hist_min_percent=0.5, hist_max_percent=99.5, sharpen=True, rgb_band_indices = [2,1,0]):        
+    def save_capture_as_rgb(self, outfilename, gamma=1.4, downsample=1, white_balance='norm', hist_min_percent=0.5, hist_max_percent=99.5, sharpen=True, rgb_band_indices = [2,1,0]):
         if self.__aligned_capture is None:
             raise RuntimeError("call Capture.create_aligned_capture prior to saving as RGB")
         im_display = np.zeros((self.__aligned_capture.shape[0],self.__aligned_capture.shape[1],self.__aligned_capture.shape[2]), dtype=np.float32 )
@@ -388,8 +388,8 @@ class Capture(object):
         im_max = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_max_percent)  # for many images, 0.5 and 99.5 are good values
 
         for i in rgb_band_indices:
-            # for rgb true color, we usually want to use the same min and max scaling across the 3 bands to 
-            # maintain the "white balance" of the calibrated image  
+            # for rgb true color, we usually want to use the same min and max scaling across the 3 bands to
+            # maintain the "white balance" of the calibrated image
             if white_balance == 'norm':
                 im_display[:,:,i] =  imageutils.normalize(self.__aligned_capture[:,:,i], im_min, im_max)
             else:
@@ -414,32 +414,32 @@ class Capture(object):
             imageio.imwrite(outfilename, (255*gamma_corr_rgb).astype('uint8'))
         else:
             imageio.imwrite(outfilename, (255*unsharp_rgb).astype('uint8'))
-    
+
     def save_thermal_over_rgb(self, outfilename, figsize=(30,23)):
         if self.__aligned_capture is None:
             raise RuntimeError("call Capture.create_aligned_capture prior to saving as RGB")
-        
+
         # by default we don't mask the thermal, since it's native resolution is much lower than the MS
         masked_thermal = self.__aligned_capture[:,:,5]
-        
+
         im_display = np.zeros((self.__aligned_capture.shape[0],self.__aligned_capture.shape[1],3), dtype=np.float32 )
         rgb_band_indices = [2,1,0]
         hist_min_percent = 0.2
         hist_max_percent = 99.8
-        # for rgb true color, we usually want to use the same min and max scaling across the 3 bands to 
-        # maintain the "white balance" of the calibrated image  
+        # for rgb true color, we usually want to use the same min and max scaling across the 3 bands to
+        # maintain the "white balance" of the calibrated image
         im_min = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_min_percent)  # modify these percentiles to adjust contrast
         im_max = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_max_percent)  # for many images, 0.5 and 99.5 are good values
         for dst_band,src_band in enumerate(rgb_band_indices):
             im_display[:,:,dst_band] =  imageutils.normalize(self.__aligned_capture[:,:,src_band], im_min, im_max)
-       
+
         # Compute a histogram
         min_display_therm = np.percentile(masked_thermal, 1)
         max_display_therm = np.percentile(masked_thermal, 99)
 
         fig, axis = plotutils.plot_overlay_withcolorbar(im_display,
-                                            masked_thermal, 
-                                            figsize=figsize, 
+                                            masked_thermal,
+                                            figsize=figsize,
                                             title='Temperature over True Color',
                                             vmin=min_display_therm,vmax=max_display_therm,
                                             overlay_alpha=0.25,
