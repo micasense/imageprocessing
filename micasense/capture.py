@@ -44,7 +44,7 @@ class Capture(object):
     found in the same folder and also share the same filename prefix, such
     as IMG_0000_*.tif, but this is not required
     """
-    def __init__(self, images, panelCorners=[None]*5):
+    def __init__(self, images, panelCorners=None):
         if isinstance(images, image.Image):
             self.images = [images]
         elif isinstance(images, list):
@@ -59,7 +59,10 @@ class Capture(object):
         self.uuid = self.images[0].capture_id
         self.panels = None
         self.detected_panel_count = 0
-        self.panelCorners = panelCorners
+        if panelCorners is None:
+            self.panelCorners = [None]*len(self.eo_indices())
+        else:
+            self.panelCorners = panelCorners
 
         self.__aligned_capture = None
 
@@ -146,8 +149,12 @@ class Capture(object):
         return [img.center_wavelength for img in self.images]
 
     def band_names(self):
-        '''Returns a list of the image band names'''
+        '''Returns a list of the image band names as they are in the image metadata'''
         return [img.band_name for img in self.images]
+    
+    def band_names_lower(self):
+        '''Returns a list of the image band names in all lower case for easier comparisons'''
+        return [img.band_name.lower() for img in self.images]
 
     def dls_present(self):
         '''Returns true if DLS metadata is present in the images'''
@@ -215,8 +222,15 @@ class Capture(object):
 
     def eo_images(self):
         return [img for img in self.images if img.band_name != 'LWIR']
+
     def lw_images(self):
         return [img for img in self.images if img.band_name == 'LWIR']
+
+    def eo_indices(self):
+        return [index for index,img in enumerate(self.images) if img.band_name != 'LWIR']
+
+    def lw_indices(self):
+        return [index for index,img in enumerate(self.images) if img.band_name == 'LWIR']
 
     def reflectance(self, irradiance_list):
         '''Comptute and return list of reflectance images for given irradiance'''
@@ -352,32 +366,41 @@ class Capture(object):
             raise RuntimeError("call Capture.create_aligned_capture prior to saving as stack")
         return self.__aligned_capture.shape
 
-    def save_capture_as_stack(self, outfilename):
+    def save_capture_as_stack(self, outfilename, sort_by_wavelength=False):
         from osgeo.gdal import GetDriverByName, GDT_UInt16
         if self.__aligned_capture is None:
             raise RuntimeError("call Capture.create_aligned_capture prior to saving as stack")
 
         rows, cols, bands = self.__aligned_capture.shape
         driver = GetDriverByName('GTiff')
+        
         outRaster = driver.Create(outfilename, cols, rows, bands, GDT_UInt16, options = [ 'INTERLEAVE=BAND','COMPRESS=DEFLATE' ])
-        if outRaster is None:
-            raise IOError("could not load gdal GeoTiff driver")
-        for i in range(0,5):
-            outband = outRaster.GetRasterBand(i+1)
-            outdata = self.__aligned_capture[:,:,i]
-            outdata[outdata<0] = 0
-            outdata[outdata>2] = 2   #limit reflectance data to 200% to allow some specular reflections
-            outband.WriteArray(outdata*32768) # scale reflectance images so 100% = 32768
-            outband.FlushCache()
+        try:
+            if outRaster is None:
+                raise IOError("could not load gdal GeoTiff driver")
 
-        if bands == 6:
-            outband = outRaster.GetRasterBand(6)
-            outdata = (self.__aligned_capture[:,:,5]+273.15) * 100 # scale data from float degC to back to centi-Kelvin to fit into uint16
-            outdata[outdata<0] = 0
-            outdata[outdata>65535] = 65535
-            outband.WriteArray(outdata)
-            outband.FlushCache()
-        outRaster = None
+            if sort_by_wavelength:
+                eo_list = list(np.argsort(self.center_wavelengths()))
+            else:
+                eo_list = self.eo_indices()
+
+            for outband,inband in enumerate(eo_list):
+                outband = outRaster.GetRasterBand(outband+1)
+                outdata = self.__aligned_capture[:,:,inband]
+                outdata[outdata<0] = 0
+                outdata[outdata>2] = 2   #limit reflectance data to 200% to allow some specular reflections
+                outband.WriteArray(outdata*32768) # scale reflectance images so 100% = 32768
+                outband.FlushCache()
+
+            for outband,inband in enumerate(self.lw_indices()):
+                outband = outRaster.GetRasterBand(len(eo_list)+outband+1)
+                outdata = (self.__aligned_capture[:,:,inband]+273.15) * 100 # scale data from float degC to back to centi-Kelvin to fit into uint16
+                outdata[outdata<0] = 0
+                outdata[outdata>65535] = 65535
+                outband.WriteArray(outdata)
+                outband.FlushCache()
+        finally:
+            outRaster = None
 
     def save_capture_as_rgb(self, outfilename, gamma=1.4, downsample=1, white_balance='norm', hist_min_percent=0.5, hist_max_percent=99.5, sharpen=True, rgb_band_indices = [2,1,0]):
         if self.__aligned_capture is None:
@@ -414,32 +437,35 @@ class Capture(object):
             imageio.imwrite(outfilename, (255*gamma_corr_rgb).astype('uint8'))
         else:
             imageio.imwrite(outfilename, (255*unsharp_rgb).astype('uint8'))
-
-    def save_thermal_over_rgb(self, outfilename, figsize=(30,23)):
+    
+    def save_thermal_over_rgb(self, outfilename, figsize=(30,23), lw_index = None, hist_min_percent = 0.2, hist_max_percent = 99.8):
         if self.__aligned_capture is None:
             raise RuntimeError("call Capture.create_aligned_capture prior to saving as RGB")
 
         # by default we don't mask the thermal, since it's native resolution is much lower than the MS
-        masked_thermal = self.__aligned_capture[:,:,5]
-
+        if lw_index is None:
+            lw_index = self.lw_indices()[0]
+        masked_thermal = self.__aligned_capture[:,:,lw_index]
+        
         im_display = np.zeros((self.__aligned_capture.shape[0],self.__aligned_capture.shape[1],3), dtype=np.float32 )
-        rgb_band_indices = [2,1,0]
-        hist_min_percent = 0.2
-        hist_max_percent = 99.8
-        # for rgb true color, we usually want to use the same min and max scaling across the 3 bands to
-        # maintain the "white balance" of the calibrated image
+        rgb_band_indices = [self.band_names_lower().index('red'),
+                            self.band_names_lower().index('green'),
+                            self.band_names_lower().index('blue')]
+
+        # for rgb true color, we usually want to use the same min and max scaling across the 3 bands to 
+        # maintain the "white balance" of the calibrated image  
         im_min = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_min_percent)  # modify these percentiles to adjust contrast
         im_max = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_max_percent)  # for many images, 0.5 and 99.5 are good values
         for dst_band,src_band in enumerate(rgb_band_indices):
             im_display[:,:,dst_band] =  imageutils.normalize(self.__aligned_capture[:,:,src_band], im_min, im_max)
 
         # Compute a histogram
-        min_display_therm = np.percentile(masked_thermal, 1)
-        max_display_therm = np.percentile(masked_thermal, 99)
+        min_display_therm = np.percentile(masked_thermal, hist_min_percent)
+        max_display_therm = np.percentile(masked_thermal, hist_max_percent)
 
-        fig, axis = plotutils.plot_overlay_withcolorbar(im_display,
-                                            masked_thermal,
-                                            figsize=figsize,
+        fig, _ = plotutils.plot_overlay_withcolorbar(im_display,
+                                            masked_thermal, 
+                                            figsize=figsize, 
                                             title='Temperature over True Color',
                                             vmin=min_display_therm,vmax=max_display_therm,
                                             overlay_alpha=0.25,

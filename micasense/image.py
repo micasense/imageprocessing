@@ -90,9 +90,6 @@ class Image(object):
         self.gain = self.meta.gain()
         self.bits_per_pixel = self.meta.bits_per_pixel()
 
-        if self.bits_per_pixel != 16:
-            NotImplemented("Unsupported pixel bit depth: {} bits".format(self.bits_per_pixel))
-
         self.vignette_center = self.meta.vignette_center()
         self.vignette_polynomial = self.meta.vignette_polynomial()
         self.distortion_parameters = self.meta.distortion_parameters()
