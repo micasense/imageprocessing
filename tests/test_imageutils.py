@@ -88,14 +88,6 @@ def test_warp_matrices(non_panel_altum_capture):
         assert(warp_matrix == pytest.approx(truth_warp_matrices[index]))
 
 def test_cropping(non_panel_altum_capture):
-    warp_mode = cv2.MOTION_HOMOGRAPHY
     warp_matrices = non_panel_altum_capture.get_warp_matrices()
-    cropped_dimensions,edges = imageutils.find_crop_bounds(non_panel_altum_capture,warp_matrices)
+    cropped_dimensions,_ = imageutils.find_crop_bounds(non_panel_altum_capture,warp_matrices)
     assert(cropped_dimensions == expected_dimensions)
-
-
-
-progress_val = 0.0
-def progress(p):
-    global progress_val
-    progress_val = p

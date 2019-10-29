@@ -62,3 +62,9 @@ def test_as_nested_lists(files_dir):
     data, columns = imgset.as_nested_lists()
     assert data[0][1] == 36.576096
     assert columns[0] == 'timestamp'
+
+def test_10_band_from_dir(ten_band_files_dir):
+    imgset = imageset.ImageSet.from_directory(ten_band_files_dir, progress)
+    assert imgset is not None
+    assert progress_val == 1.0
+    assert len(imgset.captures) == 2

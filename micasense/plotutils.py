@@ -59,7 +59,7 @@ def subplotwithcolorbar(rows, cols, images, titles=None, figsize=None):
     plt.show()
     return fig, axes
 
-def plot_overlay_withcolorbar(imgbase, imgcolor, title=None, figsize=None, vmin=None, vmax=None, overlay_alpha=1.0, overlay_colormap='viridis', overlay_steps=None, display_contours=False, contour_fmt=None, contour_steps=None, contour_alpha=None):
+def plot_overlay_withcolorbar(imgbase, imgcolor, title=None, figsize=None, vmin=None, vmax=None, overlay_alpha=1.0, overlay_colormap='viridis', overlay_steps=None, display_contours=False, contour_fmt=None, contour_steps=None, contour_alpha=None, show=True):
     ''' Plot an image with a colorbar '''
     fig, axis = plt.subplots(1, 1, figsize=figsize, squeeze=False)
     base = axis[0][0].imshow(imgbase)
@@ -81,7 +81,8 @@ def plot_overlay_withcolorbar(imgbase, imgcolor, title=None, figsize=None, vmin=
     cax = divider.append_axes("right", size="3%", pad=0.05)
     fig.colorbar(rad2, cax=cax)
     plt.tight_layout()
-    plt.show()
+    if show:
+        plt.show()
     return fig, axis[0][0]
 
 def subplot(rows, cols, images, titles=None, figsize=None):

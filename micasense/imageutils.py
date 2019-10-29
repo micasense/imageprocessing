@@ -29,6 +29,7 @@ import multiprocessing
 from skimage import exposure
 from skimage.morphology import disk
 from skimage.filters import rank, gaussian
+from skimage.util import img_as_ubyte
 
 def normalize(im, min=None, max=None):
     width, height = im.shape
@@ -42,8 +43,8 @@ def normalize(im, min=None, max=None):
     return norm
 
 def local_normalize(im):
-    norm = normalize(im) # TODO: mainly using this as a type conversion, but it's expensive
-    width, height = im.shape
+    norm = img_as_ubyte(normalize(im)) # TODO: mainly using this as a type conversion, but it's expensive
+    width, _ = im.shape
     disksize = int(width/5)
     if disksize % 2 == 0:
         disksize = disksize + 1
