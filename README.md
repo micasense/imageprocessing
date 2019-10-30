@@ -1,6 +1,6 @@
-# README 
+[![Build Status](https://travis-ci.org/micasense/imageprocessing.svg?branch=master)](https://travis-ci.org/micasense/imageprocessing)
 
-### MicaSense RedEdge Image Processing Tutorials 
+## MicaSense RedEdge and Altum Image Processing Tutorials
 
 This repository includes tutorials and examples for processing MicaSense RedEdge and Altum images into usable information using the python programming language. RedEdge images captured with firmware 2.1.0 (released June 2017) or newer are required. Altum images captured with all firmware versions are supported.
 
@@ -31,7 +31,7 @@ Once you have git installed and the repository cloned, you are ready to start wi
 
 In addition to the tutorials, we've created library code that shows some common transformations, usages, and applications of RedEdge imagery.  In general, these are intended for developers that are familiar with installing and managing python packages and third party software.  The purpose of this code is readability and clarity to help others develop processing workflows, therefore performance may not be optimal.
 
-While this code is similar to an installable python library (and supports a local the `python setup.py install` process) the main purpose of this library is one of documentation and education. For this reason, we expect most users to be looking at the source code for understanding or improvement, so they will run the notebooks from the directory that the library was `git clone`d it into. 
+While this code is similar to an installable python library (and supports the `python setup.py install` process) the main purpose of this library is one of documentation and education. For this reason, we expect most users to be looking at the source code for understanding or improvement, so they will run the notebooks from the directory that the library was `git clone`d it into. 
 
 ### Running this code
 
