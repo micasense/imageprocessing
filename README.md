@@ -65,6 +65,12 @@ Tests for many library functions are included in the `tests` diretory. Install t
 pytest .
 ```
 
+For faster testing we can use `pytest-xdist` to paralellize testing.
+
+```bash
+pytest -n auto .
+```
+
 Data used by the tests is included in the `data` folder.
 
 ### For (Tutorial) Developers 

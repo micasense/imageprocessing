@@ -25,7 +25,7 @@ setup(name='micasense',
       install_requires=[
           'requests',
           'numpy',
-          'opencv-python<4.0',
+          'opencv-python',
           'gdal',
           'pysolar',
           'matplotlib',
