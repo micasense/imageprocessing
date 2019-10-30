@@ -1,5 +1,7 @@
 # README 
 
+[![Build Status](https://travis-ci.org/micasense/imageprocessing.svg?branch=master)](https://travis-ci.org/micasense/imageprocessing)
+
 ### MicaSense RedEdge Image Processing Tutorials 
 
 This repository includes tutorials and examples for processing MicaSense RedEdge and Altum images into usable information using the python programming language. RedEdge images captured with firmware 2.1.0 (released June 2017) or newer are required. Altum images captured with all firmware versions are supported.
