@@ -246,7 +246,12 @@ def test_no_rig_relatives(non_panel_rededge_file_list):
     assert cap.has_rig_relatives() == False
 
 def test_panel_albedo(panel_altum_capture):
-    panel_altum_capture.detect_panels()
+    assert panel_altum_capture.detect_panels() == 5
+    assert panel_altum_capture.panels_in_all_expected_images()
+    good_panel_albedo = [0.5282, 0.5274, 0.5263, 0.5246, 0.5258]
+    assert panel_altum_capture.panel_albedo() == pytest.approx(good_panel_albedo, 1e-4)
+
+def test_panel_albedo_no_detect(panel_altum_capture):
     good_panel_albedo = [0.5282, 0.5274, 0.5263, 0.5246, 0.5258]
     assert panel_altum_capture.panel_albedo() == pytest.approx(good_panel_albedo, 1e-4)
 

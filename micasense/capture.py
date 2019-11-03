@@ -294,7 +294,7 @@ class Capture(object):
         return reflectance_list
 
     def panel_albedo(self):
-        if self.panels is not None:
+        if self.panels_in_all_expected_images():
             return [panel.reflectance_from_panel_serial() for panel in self.panels]
         else:
             return None
