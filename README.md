@@ -69,12 +69,15 @@ Test execution can be relatively slow (2-3 minutes) as there is a lot of image p
 
 ```bash
 pytest -n auto
+<<<<<<< HEAD
 ```
 
 For faster testing we can use `pytest-xdist` to paralellize testing.
 
 ```bash
 pytest -n auto .
+=======
+>>>>>>> 39aea903322f4c0d38daab0a26bfbdcdfeaab915
 ```
 
 Data used by the tests is included in the `data` folder.

@@ -301,7 +301,7 @@ class Capture(object):
         return reflectance_list
 
     def panel_albedo(self):
-        if self.panels is not None:
+        if self.panels_in_all_expected_images():
             return [panel.reflectance_from_panel_serial() for panel in self.panels]
         else:
             return None
@@ -373,7 +373,7 @@ class Capture(object):
             raise RuntimeError("call Capture.create_aligned_capture prior to saving as stack")
         return self.__aligned_capture.shape
 
-    def save_capture_as_stack(self, outfilename, sort_by_wavelength=False):
+    def save_capture_as_stack(self, outfilename, sort_by_wavelength=False,photometric='MINISBLACK'):
         from osgeo.gdal import GetDriverByName, GDT_UInt16
         if self.__aligned_capture is None:
             raise RuntimeError("call Capture.create_aligned_capture prior to saving as stack")
@@ -381,13 +381,13 @@ class Capture(object):
         rows, cols, bands = self.__aligned_capture.shape
         driver = GetDriverByName('GTiff')
         
-        outRaster = driver.Create(outfilename, cols, rows, bands, GDT_UInt16, options = [ 'INTERLEAVE=BAND','COMPRESS=DEFLATE' ])
+        outRaster = driver.Create(outfilename, cols, rows, bands, GDT_UInt16, options = [ 'INTERLEAVE=BAND','COMPRESS=DEFLATE',f'PHOTOMETRIC={photometric}' ])
         try:
             if outRaster is None:
                 raise IOError("could not load gdal GeoTiff driver")
 
             if sort_by_wavelength:
-                eo_list = list(np.argsort(self.center_wavelengths()))
+                eo_list = list(np.argsort(np.array(self.center_wavelengths())[self.eo_indices()]))
             else:
                 eo_list = self.eo_indices()
 
