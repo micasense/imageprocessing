@@ -168,6 +168,13 @@ class Capture(object):
         '''Returns a list of the corrected earth-surface (horizontal) DLS irradiance in W/m^2/nm'''
         return [img.horizontal_irradiance for img in self.images]
 
+    def direct_irradiance(self):
+        '''Returns a list of the DLS irradiance from the direct source in W/m^2/nm'''
+        return [img.direct_irradiance for img in self.images]
+    def scattered_irradiance(self):
+        '''Returns a list of the DLS irradiance from the direct source in W/m^2/nm'''
+        return [img.scattered_irradiance for img in self.images]
+
     def dls_pose(self):
         '''Returns (yaw,pitch,roll) tuples in radians of the earth-fixed dls pose'''
         return (self.images[0].dls_yaw, self.images[0].dls_pitch, self.images[0].dls_roll)
