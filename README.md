@@ -2,7 +2,7 @@
 
 ## MicaSense RedEdge and Altum Image Processing Tutorials
 
-This repository includes tutorials and examples for processing MicaSense RedEdge and Altum images into usable information using the python programming language. RedEdge images captured with firmware 2.1.0 (released June 2017) or newer are required. Altum images captured with all firmware versions are supported.
+This repository includes tutorials and examples for processing MicaSense RedEdge and Altum images into usable information using the python programming language. RedEdge images captured with firmware 2.1.0 (released June 2017) or newer are required. Altum images captured with all firmware versions are supported.  Dual-camera (10-band) capture are also included.
 
 The intended audience is researchers and developers with some software development experience that want to do their own image processing.  While a number of commercial tools fully support processing RedEdge data into reflectance maps, there are a number of reasons to process your own data, including controlling the entire radiometric workflow (for academic or publication reasons), pre-processing images to be used in a non-radiometric photogrammetry suite, or processing single sets of 5 images without building a larger map.
 
@@ -69,15 +69,6 @@ Test execution can be relatively slow (2-3 minutes) as there is a lot of image p
 
 ```bash
 pytest -n auto
-<<<<<<< HEAD
-```
-
-For faster testing we can use `pytest-xdist` to paralellize testing.
-
-```bash
-pytest -n auto .
-=======
->>>>>>> 39aea903322f4c0d38daab0a26bfbdcdfeaab915
 ```
 
 Data used by the tests is included in the `data` folder.
