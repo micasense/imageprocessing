@@ -422,11 +422,17 @@ import os
 def save_capture(params):
     cap = capture.Capture.from_filelist(params['file_list'])
     outputFilename = cap.uuid+'.tif'
-    thumbnailFilename = cap.uuid
+    if(os.path.exists(outputFilename) and params['overwrite_existing']==False):
+        return outputFilename
+
     fullOutputPath = os.path.join(params['output_path'], outputFilename)
-    fullThumbnailPath= os.path.join(params['thumbnail_path'], thumbnailFilename)
     cap.create_aligned_capture(irradiance_list=params['irradiance_list'], warp_matrices=params['warp_matrices'])
     cap.save_capture_as_stack(fullOutputPath, sort_by_wavelength=True, photometric=params['photometric'])
-    rgb_band_indices = [cap.band_names_lower().index('red'),cap.band_names_lower().index('green'),cap.band_names_lower().index('blue')]
-    cap.save_capture_as_rgb(fullThumbnailPath+'_rgb.jpg', rgb_band_indices = rgb_band_indices, gamma=1.8) # original indices, not sorted
+
+    if params['thumbnail_path'] is not None:
+        thumbnailFilename = cap.uuid
+        fullThumbnailPath= os.path.join(params['thumbnail_path'], thumbnailFilename)
+        rgb_band_indices = [cap.band_names_lower().index('red'),cap.band_names_lower().index('green'),cap.band_names_lower().index('blue')]
+        cap.save_capture_as_rgb(fullThumbnailPath+'_rgb.jpg', rgb_band_indices = rgb_band_indices, gamma=1.8) # original indices, not sorted
+
     return outputFilename
