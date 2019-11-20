@@ -30,6 +30,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import os, glob, fnmatch
 import micasense.image as image
 import micasense.capture as capture
+from micasense.imageutils import save_capture as save_capture
 import multiprocessing
 
 import exiftool
@@ -115,4 +116,34 @@ class ImageSet(object):
             dat = cap.utc_time().isoformat()
             irr = cap.dls_irradiance()
             series[dat] = irr
+
+    def save_stacks(self, warp_matrices, stackDirectory, thumbnailDirectory=None, irradiance=None, multiprocess=True, overwrite=False, progress_callback=None):
+        
+        if not os.path.exists(stackDirectory):
+            os.makedirs(stackDirectory)
+        if thumbnailDirectory is not None and not os.path.exists(thumbnailDirectory):
+            os.makedirs(thumbnailDirectory)
+
+        save_params_list = []
+        for capture in self.captures:
+            save_params_list.append({
+                'output_path': stackDirectory,
+                'thumbnail_path': thumbnailDirectory,
+                'file_list': [img.path for img in capture.images],
+                'warp_matrices': warp_matrices,
+                'irradiance_list': irradiance,
+                'photometric': 'MINISBLACK',
+                'overwrite_existing': overwrite,
+            })
+
+        if multiprocess:
+            pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+            for i,_ in enumerate(pool.imap_unordered(save_capture, save_params_list)):
+                if progress_callback is not None:
+                    progress_callback(float(i)/float(len(save_params_list)))
+            pool.close()
+            pool.join()
+        else:
+            for params in save_params_list:
+                save_capture(params)
 

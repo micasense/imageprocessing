@@ -29,6 +29,7 @@ import multiprocessing
 from skimage import exposure
 from skimage.morphology import disk
 from skimage.filters import rank, gaussian
+from skimage.util import img_as_ubyte
 
 def normalize(im, min=None, max=None):
     width, height = im.shape
@@ -42,8 +43,8 @@ def normalize(im, min=None, max=None):
     return norm
 
 def local_normalize(im):
-    norm = normalize(im) # TODO: mainly using this as a type conversion, but it's expensive
-    width, height = im.shape
+    norm = img_as_ubyte(normalize(im)) # TODO: mainly using this as a type conversion, but it's expensive
+    width, _ = im.shape
     disksize = int(width/5)
     if disksize % 2 == 0:
         disksize = disksize + 1
@@ -415,3 +416,23 @@ def map_points(pts, image_size, warpMatrix, distortion_coeffs, camera_matrix,war
         return new_pts[0]
     else:
         return new_pts[:,0,:]
+
+import micasense.capture as capture
+import os
+def save_capture(params):
+    cap = capture.Capture.from_filelist(params['file_list'])
+    outputFilename = cap.uuid+'.tif'
+    if(os.path.exists(outputFilename) and params['overwrite_existing']==False):
+        return outputFilename
+
+    fullOutputPath = os.path.join(params['output_path'], outputFilename)
+    cap.create_aligned_capture(irradiance_list=params['irradiance_list'], warp_matrices=params['warp_matrices'])
+    cap.save_capture_as_stack(fullOutputPath, sort_by_wavelength=True, photometric=params['photometric'])
+
+    if params['thumbnail_path'] is not None:
+        thumbnailFilename = cap.uuid
+        fullThumbnailPath= os.path.join(params['thumbnail_path'], thumbnailFilename)
+        rgb_band_indices = [cap.band_names_lower().index('red'),cap.band_names_lower().index('green'),cap.band_names_lower().index('blue')]
+        cap.save_capture_as_rgb(fullThumbnailPath+'_rgb.jpg', rgb_band_indices = rgb_band_indices, gamma=1.8) # original indices, not sorted
+
+    return outputFilename

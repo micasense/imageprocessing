@@ -39,7 +39,11 @@ def altum_files_dir():
     return os.path.join('data', 'ALTUM1SET', '000')
 
 @pytest.fixture()
-def file_list(files_dir):
+def ten_band_files_dir():
+    return os.path.join('data', '10BANDSET', '000')
+
+@pytest.fixture()
+def panel_rededge_file_list(files_dir):
     return glob.glob(os.path.join(files_dir, 'IMG_0000_*.tif'))
 
 @pytest.fixture()
@@ -55,6 +59,22 @@ def bad_file_list(files_dir):
 @pytest.fixture()
 def panel_altum_file_list(altum_files_dir):
     return glob.glob(os.path.join(altum_files_dir, 'IMG_0000_*.tif'))
+
+@pytest.fixture()
+def panel_rededge_capture(panel_rededge_file_list):
+    return capture.Capture.from_filelist(panel_rededge_file_list)
+
+@pytest.fixture()
+def non_panel_rededge_capture(non_panel_rededge_file_list):
+    return capture.Capture.from_filelist(non_panel_rededge_file_list)
+
+@pytest.fixture()
+def panel_10band_rededge_file_list(ten_band_files_dir):
+    return glob.glob(os.path.join(ten_band_files_dir, 'IMG_0000_*.tif'))
+
+@pytest.fixture()
+def flight_10band_rededge_file_list(ten_band_files_dir):
+    return glob.glob(os.path.join(ten_band_files_dir, 'IMG_0431_*.tif'))
 
 @pytest.fixture()
 def panel_altum_capture(panel_altum_file_list):
@@ -148,3 +168,11 @@ def meta_altum_dls2(altum_flight_image_name):
 def bad_dls2_horiz_irr_image():
     image_path = os.path.join('data', 'ALTUM0SET', '000')
     return image.Image(os.path.join(image_path, 'IMG_0000_1.tif'))
+
+@pytest.fixture()
+def panel_10band_rededge_capture(panel_10band_rededge_file_list):
+    return capture.Capture.from_filelist(panel_10band_rededge_file_list)
+
+@pytest.fixture()
+def flight_10band_rededge_capture(flight_10band_rededge_file_list):
+    return capture.Capture.from_filelist(flight_10band_rededge_file_list)

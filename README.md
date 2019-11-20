@@ -62,13 +62,22 @@ This code is a community effort and is not supported by MicaSense support. Pleas
 Tests for many library functions are included in the `tests` diretory. Install the `pytest` module through your package manager (e.g. `pip install pytest`) and then tests can be run from the main directory using the command:
 
 ```bash
-pytest .
+pytest
+```
+
+Test execution can be relatively slow (2-3 minutes) as there is a lot of image processing occuring in some of the tests, and quite a bit of re-used IO.  To speed up tests, install the `pytest-xdist` plugin using `conda` or `pip` and achieve a significant speed up by running tests in parallel.
+
+```bash
+pytest -n auto
+<<<<<<< HEAD
 ```
 
 For faster testing we can use `pytest-xdist` to paralellize testing.
 
 ```bash
 pytest -n auto .
+=======
+>>>>>>> 39aea903322f4c0d38daab0a26bfbdcdfeaab915
 ```
 
 Data used by the tests is included in the `data` folder.

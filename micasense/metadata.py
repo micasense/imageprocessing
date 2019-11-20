@@ -100,7 +100,7 @@ class Metadata(object):
     def dls_present(self):
         return self.get_item("XMP:Irradiance") is not None \
                or self.get_item("XMP:HorizontalIrradiance") is not None \
-               or self.get_item("XMP:DirectIrradiance is not None") is not None
+               or self.get_item("XMP:DirectIrradiance") is not None
 
     def supports_radiometric_calibration(self):
         if(self.get_item('XMP:RadiometricCalibration')) is None:
