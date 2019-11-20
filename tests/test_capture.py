@@ -268,5 +268,5 @@ def test_10_band_panel(panel_10band_rededge_file_list):
 def test_10_band_irradiance(flight_10band_rededge_capture):
     assert flight_10band_rededge_capture.dls_present()
     test_irradiance = flight_10band_rededge_capture.dls_irradiance()
-    good_irradiance = [0.55817, 0.51790, 0.44317, 0.27854, 0.34190, 0.49062, 0.53024, 0.43678, 0.38746, 0.35709]
+    good_irradiance = [0.67305, 0.62855, 0.55658, 0.34257, 0.41591, 0.57470, 0.64203, 0.53739, 0.48215, 0.44563]
     assert test_irradiance == pytest.approx(good_irradiance, abs = 1e-5)

@@ -74,7 +74,7 @@ def panel_10band_rededge_file_list(ten_band_files_dir):
 
 @pytest.fixture()
 def flight_10band_rededge_file_list(ten_band_files_dir):
-    return glob.glob(os.path.join(ten_band_files_dir, 'IMG_0001_*.tif'))
+    return glob.glob(os.path.join(ten_band_files_dir, 'IMG_0431_*.tif'))
 
 @pytest.fixture()
 def panel_altum_capture(panel_altum_file_list):
