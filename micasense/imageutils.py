@@ -24,6 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import cv2
+import os
 import numpy as np
 import multiprocessing
 from skimage import exposure
@@ -417,9 +418,8 @@ def map_points(pts, image_size, warpMatrix, distortion_coeffs, camera_matrix,war
     else:
         return new_pts[:,0,:]
 
-import micasense.capture as capture
-import os
 def save_capture(params):
+    import micasense.capture as capture
     cap = capture.Capture.from_filelist(params['file_list'])
     outputFilename = cap.uuid+'.tif'
     if(os.path.exists(outputFilename) and params['overwrite_existing']==False):
