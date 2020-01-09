@@ -146,6 +146,14 @@ def test_panel_irradiance(panel_rededge_capture):
     for i,_ in enumerate(expected_rad):
         assert rad[i] == pytest.approx(expected_rad[i], rel=0.001)
 
+def test_panel_albedo_not_preset(panel_rededge_capture):
+    assert panel_rededge_capture.panels_in_all_expected_images()
+    assert panel_rededge_capture.panel_albedo() == None
+
+def test_panel_albedo_preset(panel_altum_capture):
+    assert panel_altum_capture.panels_in_all_expected_images()
+    assert panel_altum_capture.panel_albedo() == pytest.approx(5*[0.52],abs=0.01)
+
 def test_detect_panels_in_panel_image(panel_rededge_capture):
     assert panel_rededge_capture.detect_panels() == 5
     assert panel_rededge_capture.panels_in_all_expected_images() == True

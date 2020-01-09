@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.7
-  - opencv
+  - opencv=4.1
   - numpy
   - jupyter
   - matplotlib
