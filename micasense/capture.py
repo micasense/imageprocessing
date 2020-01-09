@@ -302,9 +302,12 @@ class Capture(object):
 
     def panel_albedo(self):
         if self.panels_in_all_expected_images():
-            return [panel.reflectance_from_panel_serial() for panel in self.panels]
+            albedos = [panel.reflectance_from_panel_serial() for panel in self.panels]
+            if None in albedos:
+                albedos = None
         else:
-            return None
+            albedos = None
+        return albedos
 
     def detect_panels(self):
         from micasense.panel import Panel
