@@ -453,9 +453,9 @@ class Image(object):
             R = rotations_degrees_to_rotation_matrix(self.rig_relatives)
         if T is None:
             T =np.zeros(3)
-
+        R_ref = rotations_degrees_to_rotation_matrix(ref.rig_relatives)
         A = np.zeros((4,4))
-        A[0:3,0:3]=R
+        A[0:3,0:3]=np.dot(R_ref.T,R)
         A[0:3,3]=T
         A[3,3]=1.
         C, _ = cv2.getOptimalNewCameraMatrix(self.cv2_camera_matrix(),
