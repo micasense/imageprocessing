@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import pytest
 import os, glob
+import numpy as np
 
 import micasense.capture as capture
 import micasense.image as image
@@ -278,3 +279,9 @@ def test_10_band_irradiance(flight_10band_rededge_capture):
     test_irradiance = flight_10band_rededge_capture.dls_irradiance()
     good_irradiance = [0.67305, 0.62855, 0.55658, 0.34257, 0.41591, 0.57470, 0.64203, 0.53739, 0.48215, 0.44563]
     assert test_irradiance == pytest.approx(good_irradiance, abs = 1e-5)
+
+def test_get_warp_matrices(test_capture):
+    for i in range(len(test_capture.images)):
+        w = test_capture.get_warp_matrices(i)
+        np.testing.assert_allclose(np.eye(3),w[i],atol=1e-6)
+    
