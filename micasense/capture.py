@@ -36,6 +36,7 @@ import numpy as np
 import cv2
 import os
 import imageio
+from skimage.filters import unsharp_mask
 
 class Capture(object):
     """
@@ -416,9 +417,9 @@ class Capture(object):
         if self.__aligned_capture is None:
             raise RuntimeError("call Capture.create_aligned_capture prior to saving as RGB")
         im_display = np.zeros((self.__aligned_capture.shape[0],self.__aligned_capture.shape[1],self.__aligned_capture.shape[2]), dtype=np.float32 )
-
-        im_min = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_min_percent)  # modify these percentiles to adjust contrast
-        im_max = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_max_percent)  # for many images, 0.5 and 99.5 are good values
+        for i in rgb_band_indices:
+        
+        im_min, im_max = np.percentile(self.__aligned_capture[:,:,rgb_band_indices].flatten(), hist_min_percent, hist_max_percent)  # modify these percentiles to adjust contrast
 
         for i in rgb_band_indices:
             # for rgb true color, we usually want to use the same min and max scaling across the 3 bands to
@@ -429,15 +430,11 @@ class Capture(object):
                 im_display[:,:,i] =  imageutils.normalize(self.__aligned_capture[:,:,i])
 
         rgb = im_display[:,:,rgb_band_indices]
-        rgb = cv2.resize(rgb, None, fx=1/downsample, fy=1/downsample, interpolation=cv2.INTER_AREA)
+        if downsample != 1:
+            rgb = cv2.resize(rgb, None, fx=1/downsample, fy=1/downsample, interpolation=cv2.INTER_LANCZOS4)
 
         if sharpen:
-            gaussian_rgb = cv2.GaussianBlur(rgb, (9,9), 10.0)
-            gaussian_rgb[gaussian_rgb<0] = 0
-            gaussian_rgb[gaussian_rgb>1] = 1
-            unsharp_rgb = cv2.addWeighted(rgb, 1.5, gaussian_rgb, -0.5, 0)
-            unsharp_rgb[unsharp_rgb<0] = 0
-            unsharp_rgb[unsharp_rgb>1] = 1
+            unsharp_rgb = unsharp_mask(rgb, radius = 1, amount=2.0)
         else:
             unsharp_rgb = rgb
 
