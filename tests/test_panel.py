@@ -140,3 +140,21 @@ def test_altum_lwir(altum_lwir_image_name):
     assert img.auto_calibration_image == False
     pan = panel.Panel(img)
     assert pan.panel_detected() == False
+
+
+def test_ordered_coordinates(panel_image_name):
+    img = image.Image(panel_image_name)
+    if img.panel_region is not None:
+        ordered_corners = img.panel_region
+    else:
+        ordered_corners = [(809, 613), (648, 615), (646, 454), (808, 452)]
+    pan = panel.Panel(img, panelCorners=ordered_corners)
+    assert pan.ordered_panel_coordinates() == ordered_corners
+
+
+def test_unordered_coordinates(panel_image_name):
+    img = image.Image(panel_image_name)
+    ordered_corners = [(809, 613), (648, 615), (646, 454), (808, 452)]
+    unordered_corners = [(648, 615), (809, 613), (808, 452), (646, 454)]
+    pan = panel.Panel(img, panelCorners=unordered_corners)
+    assert pan.ordered_panel_coordinates() == ordered_corners
