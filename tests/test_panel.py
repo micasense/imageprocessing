@@ -24,10 +24,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import pytest
-import os, glob
-import math
+
 import micasense.image as image
 import micasense.panel as panel
+
 
 def test_qr_corners(panel_image_name):
     img = image.Image(panel_image_name)
@@ -42,6 +42,7 @@ def test_qr_corners(panel_image_name):
         assert pt[0] == pytest.approx(good_qr_corners[i][0], abs=3)
         assert pt[1] == pytest.approx(good_qr_corners[i][1], abs=3)
 
+
 def test_panel_corners(panel_image_name):
     img = image.Image(panel_image_name)
     pan = panel.Panel(img)
@@ -55,25 +56,28 @@ def test_panel_corners(panel_image_name):
         assert pt[0] == pytest.approx(good_pts[i][0], abs=3)
         assert pt[1] == pytest.approx(good_pts[i][1], abs=3)
 
+
 # test manually providing bad corners - in this case the corners of the qr code itself
 def test_raw_panel_bad_corners(panel_image_name):
     img = image.Image(panel_image_name)
-    pan = panel.Panel(img,panelCorners=[[460, 599], [583, 599], [584, 478], [462, 477]])
+    pan = panel.Panel(img, panelCorners=[[460, 599], [583, 599], [584, 478], [462, 477]])
     mean, std, num, sat = pan.raw()
     assert mean == pytest.approx(26965, rel=0.01)
     assert std == pytest.approx(15396.0, rel=0.05)
     assert num == pytest.approx(14824, rel=0.01)
     assert sat == pytest.approx(0, abs=2)
 
+
 # test manually providing good corners
 def test_raw_panel_manual(panel_image_name):
     img = image.Image(panel_image_name)
-    pan = panel.Panel(img,panelCorners=[[809, 613], [648, 615], [646, 454], [808, 452]])
+    pan = panel.Panel(img, panelCorners=[[809, 613], [648, 615], [646, 454], [808, 452]])
     mean, std, num, sat = pan.raw()
     assert mean == pytest.approx(45406, rel=0.01)
     assert std == pytest.approx(738.0, rel=0.05)
     assert num == pytest.approx(26005, rel=0.001)
     assert sat == pytest.approx(0, abs=2)
+
 
 def test_raw_panel(panel_image_name):
     img = image.Image(panel_image_name)
@@ -84,6 +88,7 @@ def test_raw_panel(panel_image_name):
     assert num == pytest.approx(26005, rel=0.02)
     assert sat == pytest.approx(0, abs=2)
 
+
 def test_intensity_panel(panel_image_name):
     img = image.Image(panel_image_name)
     pan = panel.Panel(img)
@@ -92,6 +97,7 @@ def test_intensity_panel(panel_image_name):
     assert std == pytest.approx(23, rel=0.03)
     assert num == pytest.approx(26005, rel=0.02)
     assert sat == pytest.approx(0, abs=2)
+
 
 def test_radiance_panel(panel_image_name):
     img = image.Image(panel_image_name)
@@ -102,22 +108,26 @@ def test_radiance_panel(panel_image_name):
     assert num == pytest.approx(26005, rel=0.02)
     assert sat == pytest.approx(0, abs=2)
 
+
 def test_irradiance_mean(panel_image_name):
     img = image.Image(panel_image_name)
     pan = panel.Panel(img)
     panel_reflectance = 0.67
     mean = pan.irradiance_mean(panel_reflectance)
     assert mean == pytest.approx(0.7984, rel=0.001)
-    
+
+
 def test_panel_detected(panel_image_name):
     img = image.Image(panel_image_name)
     pan = panel.Panel(img)
     assert pan.panel_detected() == True
 
+
 def test_panel_not_detected(flight_image_name):
     img = image.Image(flight_image_name)
     pan = panel.Panel(img)
     assert pan.panel_detected() == False
+
 
 def test_altum_panel(altum_panel_image_name):
     img = image.Image(altum_panel_image_name)
@@ -134,6 +144,7 @@ def test_altum_panel(altum_panel_image_name):
         assert pt[0] == pytest.approx(good_pts[i][0], abs=3)
         assert pt[1] == pytest.approx(good_pts[i][1], abs=3)
     assert pan.qr_corners() == None
+
 
 def test_altum_lwir(altum_lwir_image_name):
     img = image.Image(altum_lwir_image_name)
