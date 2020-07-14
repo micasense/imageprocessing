@@ -31,7 +31,16 @@ Once you have git installed and the repository cloned, you are ready to start wi
 
 In addition to the tutorials, we've created library code that shows some common transformations, usages, and applications of RedEdge imagery.  In general, these are intended for developers that are familiar with installing and managing python packages and third party software.  The purpose of this code is readability and clarity to help others develop processing workflows, therefore performance may not be optimal.
 
-While this code is similar to an installable python library (and supports the `python setup.py install` process) the main purpose of this library is one of documentation and education. For this reason, we expect most users to be looking at the source code for understanding or improvement, so they will run the notebooks from the directory that the library was `git clone`d it into. 
+While this code is similar to an installable python library (and supports the `python setup.py install` process) the main purpose of this library is one of documentation and education. For this reason, we expect most users to be looking at the source code for understanding or improvement, so they will run the notebooks from the directory that the library was `git clone`d it into.
+
+#### Batch Processing Utility
+
+A command line utility (```batchprocessing``` package) has been developed to allow users to more efficiently process MicaSense Altum/RedEdge captures into stacked TIFFs as outlined in the [Batch Processing notebook](https://micasense.github.io/imageprocessing/Batch%20Processing.html).
+
+This utility is installed alongside the ```micasense``` library when ```python setup.py install``` is ran from the top-level directory of this repository.
+
+Details on usage of this utility can be found in the [```batchprocessing``` README](https://github.com/micasense/imageprocessing/blob/master/batchprocessing/README.md).
+
 
 ### Running this code
 
@@ -43,13 +52,13 @@ jupyter notebook .
 
 That command should open a web browser window showing the set of files and folder in the repository. Click the `...Setup.ipynb` notebook to get started.
 
-Second, a set of helper utilities is available in the `micasense` folder that can be used both with these tutorials as well as separtely. 
+Second, a set of helper utilities is available in the `micasense` folder that can be used both with these tutorials as well as separtely.
 
 Note that some of the hyperlinks in the notebooks may give you a 404 Not Found error. This is because the links are setup to allow the list of files above to be accessed on the github.io site.  When running the notebooks, use your jupyter "home" tab to open the different notebooks.
 
 ### Contribution guidelines
 
-Find a problem with the tutorial? Please look through the existing issues (open and closed) and if it's new, [create an issue on github](https://github.com/micasense/imageprocessing/issues). 
+Find a problem with the tutorial? Please look through the existing issues (open and closed) and if it's new, [create an issue on github](https://github.com/micasense/imageprocessing/issues).
 
 Want to correct an issue or expand library functionality?  Fork the repository, make your fix, and submit a pull request on github.
 
@@ -73,7 +82,7 @@ pytest -n auto
 
 Data used by the tests is included in the `data` folder.
 
-### For (Tutorial) Developers 
+### For (Tutorial) Developers
 
 To generate the HTML pages after updating the jupyter notebooks, run the following command in the repository directory:
 
