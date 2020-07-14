@@ -4,7 +4,8 @@
 import codecs
 from setuptools import setup, find_packages
 import os
-
+import sys
+import subprocess
 # Parse the version from the main __init__.py
 with open('micasense/__init__.py') as f:
     for line in f:
@@ -35,4 +36,4 @@ setup(name='micasense',
           'pytz',
           'pyzbar'
       ])
-
+subprocess.check_call([sys.executable, 'batchprocessing/setup.py', sys.argv[1]])
