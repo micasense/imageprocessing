@@ -216,8 +216,12 @@ class Image(object):
         return self.__raw_image
     
     def set_raw(self,img):
-        ''' set raw data from input img'''
+        ''' set raw image from input img'''
         self.__raw_image = img.astype(np.uint16)
+        
+    def set_undistorted(self,img):
+        ''' set undistorted image from input img'''
+        self.__undistorted_image = img.astype(np.uint16)
         
     def set_external_rig_relatives(self,external_rig_relatives):
         self.rig_translations = external_rig_relatives['rig_translations']
