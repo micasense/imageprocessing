@@ -214,7 +214,11 @@ class Image(object):
                 print("Could not open image at path {}".format(self.path))
                 raise
         return self.__raw_image
-
+    
+    def set_raw(self,img):
+        ''' set raw data from input img'''
+        self.__raw_image = img.astype(np.uint16)
+        
     def set_external_rig_relatives(self,external_rig_relatives):
         self.rig_translations = external_rig_relatives['rig_translations']
         #external rig relatives are in rad
