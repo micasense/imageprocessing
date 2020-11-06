@@ -214,7 +214,15 @@ class Image(object):
                 print("Could not open image at path {}".format(self.path))
                 raise
         return self.__raw_image
-
+    
+    def set_raw(self,img):
+        ''' set raw image from input img'''
+        self.__raw_image = img.astype(np.uint16)
+        
+    def set_undistorted(self,img):
+        ''' set undistorted image from input img'''
+        self.__undistorted_image = img.astype(np.uint16)
+        
     def set_external_rig_relatives(self,external_rig_relatives):
         self.rig_translations = external_rig_relatives['rig_translations']
         #external rig relatives are in rad
@@ -453,9 +461,9 @@ class Image(object):
             R = rotations_degrees_to_rotation_matrix(self.rig_relatives)
         if T is None:
             T =np.zeros(3)
-
+        R_ref = rotations_degrees_to_rotation_matrix(ref.rig_relatives)
         A = np.zeros((4,4))
-        A[0:3,0:3]=R
+        A[0:3,0:3]=np.dot(R_ref.T,R)
         A[0:3,3]=T
         A[3,3]=1.
         C, _ = cv2.getOptimalNewCameraMatrix(self.cv2_camera_matrix(),
