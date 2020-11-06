@@ -80,7 +80,23 @@ def test_raw_panel_manual(panel_image_name):
     assert num == pytest.approx(26005, rel=0.001)
     assert sat == pytest.approx(0, abs=2)
 
-
+# test saturated pixels with modified panel picture
+def test_raw_panel_saturatedl(panel_image_name):
+    img = image.Image(panel_image_name)
+    pan = panel.Panel(img,panelCorners=[[809, 613], [648, 615], [646, 454], [808, 452]])
+    
+    #saturate 2500 pixels in the raw image - note that on the undistorted image this
+    #will result in 2329 saturated pixels
+    i0 = img.raw()
+    i0[500:550,700:750]=4095*16+1
+    img.set_raw(i0)
+    
+    mean, std, num, sat = pan.raw()
+    print(mean,std,num,sat)
+    assert mean == pytest.approx(47245, rel=0.01)
+    assert std == pytest.approx(5846.1, rel=0.05)
+    assert num == pytest.approx(26005, rel=0.001)
+    assert sat == pytest.approx(2329, abs=0)
 
 def test_raw_panel(panel_image_name):
     img = image.Image(panel_image_name)
