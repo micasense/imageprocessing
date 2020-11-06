@@ -28,6 +28,7 @@ import os, glob
 import math
 import micasense.image as image
 import micasense.panel as panel
+import operator
 
 def test_qr_corners(panel_image_name):
     img = image.Image(panel_image_name)
@@ -50,6 +51,10 @@ def test_panel_corners(panel_image_name):
     assert panel_pts is not None
     assert len(panel_pts) == len(good_pts)
     assert pan.serial == 'RP02-1603036-SC'
+    # the particular order of the points is not relevant
+    # so sort by coordinates
+    panel_pts = sorted(panel_pts,key=operator.itemgetter(0,1))
+    good_pts = sorted(good_pts,key=operator.itemgetter(0,1))
     for i, pt in enumerate(panel_pts):
         # different opencv/zbar versions round differently it seems
         assert pt[0] == pytest.approx(good_pts[i][0], abs=3)
@@ -74,6 +79,8 @@ def test_raw_panel_manual(panel_image_name):
     assert std == pytest.approx(738.0, rel=0.05)
     assert num == pytest.approx(26005, rel=0.001)
     assert sat == pytest.approx(0, abs=2)
+
+
 
 def test_raw_panel(panel_image_name):
     img = image.Image(panel_image_name)
@@ -128,7 +135,12 @@ def test_altum_panel(altum_panel_image_name):
     assert panel_pts is not None
     assert len(panel_pts) == len(good_pts)
     assert pan.serial == 'RP04-1901231-SC'
-    print(panel_pts)
+    
+    # the particular order of the points is not relevant
+    # so sort by coordinates
+    panel_pts = sorted(panel_pts,key=operator.itemgetter(0,1))
+    good_pts = sorted(good_pts,key=operator.itemgetter(0,1))
+
     for i, pt in enumerate(panel_pts):
         # different opencv/zbar versions round differently it seems
         assert pt[0] == pytest.approx(good_pts[i][0], abs=3)
