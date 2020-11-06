@@ -94,6 +94,7 @@ def non_panel_altum_capture(non_panel_altum_file_list):
 def panel_image_name():
     image_path = os.path.join('data', '0000SET', '000')
     return os.path.join(image_path, 'IMG_0000_1.tif')
+    
 
 @pytest.fixture()
 def panel_image_name_red():
