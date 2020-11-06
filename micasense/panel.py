@@ -223,8 +223,10 @@ class Panel(object):
         mean_value = panel_pixels.mean()
         saturated_count = 0
         if sat_threshold is not None:
-            saturated_px = np.asarray(np.where(panel_pixels > sat_threshold))
-            saturated_count = saturated_px.sum()
+            saturated_count = (panel_pixels > sat_threshold).sum()
+            #set saturated pixels here
+            if num_pixels>0:
+                self.saturated_panel_pixels_pct = (100.0*saturated_count)/num_pixels
         return mean_value, stdev, num_pixels, saturated_count
         
     def raw(self):
