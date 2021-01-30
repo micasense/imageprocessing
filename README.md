@@ -39,7 +39,7 @@ A command line utility (```batchprocessing``` package) has been developed to all
 
 This utility is installed alongside the ```micasense``` library when ```python setup.py install``` is ran from the top-level directory of this repository.
 
-Details on usage of this utility can be found in the [```batchprocessing``` README](https://github.com/micasense/imageprocessing/blob/master/batchprocessing/README.md).
+Details on usage of this utility can be found in the [```batchprocessing``` README](https://github.com/JPI93/imageprocessing-1/blob/master/batchprocessing/README.md).
 
 
 ### Running this code
