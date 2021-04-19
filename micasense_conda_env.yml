@@ -23,6 +23,6 @@ dependencies:
   - pip:
     - pyzbar
     - mapboxgl
-    - git+https://github.com/smarnach/pyexiftool.git#egg=pyexiftoolpy
+    - git+https://github.com/smarnach/pyexiftool.git#egg=pyexiftool
     - jenkspy
     - rawpy

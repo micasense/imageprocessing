@@ -191,6 +191,25 @@ class Panel(object):
         self.__panel_bounds = bounds[idx]
         return self.__panel_bounds
 
+    def ordered_panel_coordinates(self):
+        """
+        Return panel region coordinates in a predictable order. Panel region coordinates that are automatically
+        detected by the camera are ordered differently than coordinates detected by Panel.panel_corners().
+        :return: [ (ur), (ul), (ll), (lr) ] to mirror Image.panel_region attribute order
+        """
+        pc = self.panel_corners()
+        pc = sorted(pc, key=lambda x: x[0])
+
+        # get the coordinates on the "left" and "right" side of the bounding box
+        left_coords = pc[:2]
+        right_coords = pc[2:]
+
+        # sort y values ascending for correct order
+        left_coords = sorted(left_coords, key=lambda y: y[0])
+        right_coords = sorted(right_coords, key=lambda y: y[0])
+
+        return [tuple(right_coords[1]), tuple(left_coords[1]), tuple(left_coords[0]), tuple(right_coords[0])]
+
     def region_stats(self, img, region, sat_threshold=None):
         """Provide regional statistics for a image over a region
         Inputs: img is any image ndarray, region is a skimage shape
@@ -204,8 +223,10 @@ class Panel(object):
         mean_value = panel_pixels.mean()
         saturated_count = 0
         if sat_threshold is not None:
-            saturated_px = np.asarray(np.where(panel_pixels > sat_threshold))
-            saturated_count = saturated_px.sum()
+            saturated_count = (panel_pixels > sat_threshold).sum()
+            #set saturated pixels here
+            if num_pixels>0:
+                self.saturated_panel_pixels_pct = (100.0*saturated_count)/num_pixels
         return mean_value, stdev, num_pixels, saturated_count
         
     def raw(self):

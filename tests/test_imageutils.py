@@ -85,9 +85,9 @@ def test_image_properties(non_panel_altum_capture):
 def test_warp_matrices(non_panel_altum_capture):
     warp_matrices = non_panel_altum_capture.get_warp_matrices()
     for index,warp_matrix in enumerate(warp_matrices):
-        assert(warp_matrix == pytest.approx(truth_warp_matrices[index]))
+        assert(warp_matrix == pytest.approx(truth_warp_matrices[index],rel=1e-2))
 
 def test_cropping(non_panel_altum_capture):
     warp_matrices = non_panel_altum_capture.get_warp_matrices()
     cropped_dimensions,_ = imageutils.find_crop_bounds(non_panel_altum_capture,warp_matrices)
-    assert(cropped_dimensions == expected_dimensions)
+    assert(cropped_dimensions == pytest.approx(expected_dimensions,abs=1))
