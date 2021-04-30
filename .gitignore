@@ -2,6 +2,7 @@
 *.pyc
 .ipynb_checkpoints
 .vscode
+/.idea
 __pycache__
 /dist/
 /*.egg-info

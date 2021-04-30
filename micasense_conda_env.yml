@@ -3,26 +3,25 @@ channels:
   - conda-forge
 dependencies:
   - python=3.7
-  - opencv=4.1
-  - numpy
+  - opencv
+  - gdal
   - jupyter
   - matplotlib
-  - pysolar
-  - gdal
   - scikit-image
-  - pytest
+  - imageio
   - git
   - git-lfs
   - pandas
-  - imageio
   - nb_conda
+  - pytest
+  - pytest-xdist
+  - pip
   - requests
   - packaging
-  - pip
-  - pytest-xdist
   - pip:
-    - pyzbar
-    - mapboxgl
-    - git+https://github.com/smarnach/pyexiftool.git#egg=pyexiftool
-    - jenkspy
-    - rawpy
+      - pysolar
+      - pyzbar
+      - mapboxgl
+      - git+https://github.com/sylikc/pyexiftool#egg=pyexiftool
+      - jenkspy
+      - rawpy

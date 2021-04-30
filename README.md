@@ -2,9 +2,9 @@
 
 ## MicaSense RedEdge and Altum Image Processing Tutorials
 
-This repository includes tutorials and examples for processing MicaSense RedEdge and Altum images into usable information using the python programming language. RedEdge images captured with firmware 2.1.0 (released June 2017) or newer are required. Altum images captured with all firmware versions are supported.  Dual-camera (10-band) capture are also included.
+This repository includes tutorials and examples for processing MicaSense RedEdge and Altum images into usable information using the Python programming language. RedEdge images captured with firmware 2.1.0 (released June 2017) or newer are required. Altum images captured with all firmware versions are supported. Dual-camera (10-band) capture are also included.
 
-The intended audience is researchers and developers with some software development experience that want to do their own image processing.  While a number of commercial tools fully support processing RedEdge data into reflectance maps, there are a number of reasons to process your own data, including controlling the entire radiometric workflow (for academic or publication reasons), pre-processing images to be used in a non-radiometric photogrammetry suite, or processing single sets of 5 images without building a larger map.
+The intended audience is researchers and developers with some software development experience that want to do their own image processing. While a number of commercial tools fully support processing RedEdge data into reflectance maps, there are a number of reasons to process your own data, including controlling the entire radiometric workflow (for academic or publication reasons), pre-processing images to be used in a non-radiometric photogrammetry suite, or processing single sets of images without building a larger map.
 
 ### What do I need to succeed?
 
@@ -12,30 +12,33 @@ A working knowledge of running Python software on your system and using the comm
 
 You can start today even if you don't have your own RedEdge or Altum. We provide example images, including full flight datasets.
 
-For a user of RedEdge or Altum that wants a turnkey processing solution, this repository probably is not the best place to start.  Instead consider one of the MicaSense processing partners who provide turnkey software for processing and analysis.
-
-### Tutorial Articles
-
-[Click here to view the tutorial articles](https://micasense.github.io/imageprocessing/index.html). The set of example notebooks and their outputs can be viewed in your browser without downloading anything or running any code.
+For a user of RedEdge or Altum that wants a turnkey processing solution, this repository probably is not the best place to start. Instead, consider one of the MicaSense processing partners who provide turnkey software for processing and analysis.
 
 ### How do I get set up?
 
-First you'll need to install [git](https://git-scm.com/downloads) and [git-lfs](https://git-lfs.github.com/).  Install both before running `git clone` or you may have issues with the example data files included.
+First, [check out the setup tutorial](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Setup.html) which will walk you through installing and checking the necessary tools to run the remaining tutorials.
 
-Next, `git clone` this repository, as it has all of the code and examples you'll need.
+Next, [click here to view the tutorial articles](https://micasense.github.io/imageprocessing/index.html). The set of example notebooks and their outputs can be viewed in your browser without downloading anything or running any code.
 
-Once you have git installed and the repository cloned, you are ready to start with the first tutorial. Check out the [setup tutorial](https://micasense.github.io/imageprocessing/MicaSense%20Image%20Processing%20Setup.html) which will walk through installing and checking the necessary tools to run the remaining tutorials.
+For a quick start, make sure you have [git](https://git-scm.com/downloads), [git-lfs](https://git-lfs.github.com/), and [Anaconda](https://www.anaconda.com/) installed.
 
+And then:
+```
+git clone https://github.com/micasense/imageprocessing
+cd imageprocessing
+conda env create -f micasense_conda_env.yml # or pip install .
+jupyter notebook .
+```
 
 ### MicaSense Library Usage
 
-In addition to the tutorials, we've created library code that shows some common transformations, usages, and applications of RedEdge imagery.  In general, these are intended for developers that are familiar with installing and managing python packages and third party software.  The purpose of this code is readability and clarity to help others develop processing workflows, therefore performance may not be optimal.
+In addition to the tutorials, we've created library code that shows some common transformations, usages, and applications of RedEdge and Altum imagery. In general, these are intended for developers that are familiar with installing and managing python packages and third party software.  The purpose of this code is readability and clarity to help others develop processing workflows, therefore performance may not be optimal.
 
-While this code is similar to an installable python library (and supports the `python setup.py install` process) the main purpose of this library is one of documentation and education. For this reason, we expect most users to be looking at the source code for understanding or improvement, so they will run the notebooks from the directory that the library was `git clone`d it into. 
+While this code is similar to an installable Python library (and supports the `python setup.py install` process) the main purpose of this library is one of documentation and education. For this reason, we expect most users to be looking at the source code for understanding or improvement, so they will run the notebooks from the directory that the library was `git clone`d it into. 
 
 ### Running this code
 
-The code in these tutorials consists of two parts. First, the tutorials generally end in `.ipynb` and are the Jupyter notebooks that were used to create the web page tutorials linked above. You can run this code by opening a terminal/iTerm (linux/mac) or Anaconda Command Prompt (Windows), navigating to the folder you cloned the git repository into, and running
+The code in these tutorials consists of two parts. First, the tutorials generally end in `.ipynb` and are the Jupyter notebooks that were used to create the web page tutorials linked above. You can run this code by opening a terminal/iTerm (Linux/macOS) or Anaconda Command Prompt (Windows), navigating to the folder you cloned the git repository into, and running
 
 ```bash
 jupyter notebook .
