@@ -8,6 +8,7 @@ dependencies:
   - jupyter
   - matplotlib
   - scikit-image
+  - imageio
   - git
   - git-lfs
   - pandas
