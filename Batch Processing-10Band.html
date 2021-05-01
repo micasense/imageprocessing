@@ -13132,8 +13132,8 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="k">import</span> <span class="n">FloatProgress</span><span class="p">,</span> <span class="n">Layout</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">display</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ipywidgets</span> <span class="kn">import</span> <span class="n">FloatProgress</span><span class="p">,</span> <span class="n">Layout</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span>
 <span class="kn">import</span> <span class="nn">micasense.imageset</span> <span class="k">as</span> <span class="nn">imageset</span>
 <span class="kn">import</span> <span class="nn">micasense.capture</span> <span class="k">as</span> <span class="nn">capture</span>
 <span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">glob</span>
@@ -13215,13 +13215,13 @@ div#notebook {
 
  
  
-<div id="47045a03-9c62-405a-ae73-6c5af4f01867"></div>
+<div id="16b3d4ba-189e-457f-a539-d594abc92f5a"></div>
 <div class="output_subarea output_widget_view ">
 <script type="text/javascript">
-var element = $('#47045a03-9c62-405a-ae73-6c5af4f01867');
+var element = $('#16b3d4ba-189e-457f-a539-d594abc92f5a');
 </script>
 <script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "0ea44ecda2d94b28baf7faf14d87e7d0"}
+{"version_major": 2, "version_minor": 0, "model_id": "9eceac4218b24d94936f1f2f208cfd42"}
 </script>
 </div>
 
@@ -13233,7 +13233,7 @@ var element = $('#47045a03-9c62-405a-ae73-6c5af4f01867');
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Wall time: 15.3 s
+<pre>Wall time: 16.6 s
 </pre>
 </div>
 </div>
@@ -13249,9 +13249,9 @@ var element = $('#47045a03-9c62-405a-ae73-6c5af4f01867');
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">mapboxgl.viz</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">mapboxgl.utils</span> <span class="k">import</span> <span class="n">df_to_geojson</span><span class="p">,</span> <span class="n">create_radius_stops</span><span class="p">,</span> <span class="n">scale_between</span>
-<span class="kn">from</span> <span class="nn">mapboxgl.utils</span> <span class="k">import</span> <span class="n">create_color_stops</span>
+<span class="kn">from</span> <span class="nn">mapboxgl.viz</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">mapboxgl.utils</span> <span class="kn">import</span> <span class="n">df_to_geojson</span><span class="p">,</span> <span class="n">create_radius_stops</span><span class="p">,</span> <span class="n">scale_between</span>
+<span class="kn">from</span> <span class="nn">mapboxgl.utils</span> <span class="kn">import</span> <span class="n">create_color_stops</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="n">data</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="n">imgset</span><span class="o">.</span><span class="n">as_nested_lists</span><span class="p">()</span>
@@ -13893,8 +13893,8 @@ function generatePropertyExpression(expressionType, propertyValue, stops, defaul
 <div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">array</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">float32</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">float32</span>
 
 <span class="c1"># Use the warp_matrices derived from the Alignment Tutorial for this RedEdge set without RigRelatives</span>
 <span class="n">warp_matrices</span> <span class="o">=</span> <span class="p">[</span><span class="n">array</span><span class="p">([[</span> <span class="mf">1.0020243e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.7388311e-04</span><span class="p">,</span>  <span class="mf">2.4971788e+01</span><span class="p">],</span>
@@ -13949,6 +13949,11 @@ function generatePropertyExpression(expressionType, propertyValue, stops, defaul
 <span class="k">def</span> <span class="nf">update_f2</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
     <span class="n">f2</span><span class="o">.</span><span class="n">value</span><span class="o">=</span><span class="n">val</span>
 
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outputPath</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outputPath</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">generateThumbnails</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">thumbnailPath</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">thumbnailPath</span><span class="p">)</span>
+
 <span class="c1"># Save out geojson data so we can open the image capture locations in our GIS</span>
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outputPath</span><span class="p">,</span><span class="s1">&#39;imageSet.json&#39;</span><span class="p">),</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">geojson_data</span><span class="p">))</span>
@@ -13995,13 +14000,13 @@ function generatePropertyExpression(expressionType, propertyValue, stops, defaul
 
  
  
-<div id="c11ddf97-9d7b-4b4b-ad50-48c3cf157039"></div>
+<div id="fb997e3e-e532-4667-b05d-8a670c6349ef"></div>
 <div class="output_subarea output_widget_view ">
 <script type="text/javascript">
-var element = $('#c11ddf97-9d7b-4b4b-ad50-48c3cf157039');
+var element = $('#fb997e3e-e532-4667-b05d-8a670c6349ef');
 </script>
 <script type="application/vnd.jupyter.widget-view+json">
-{"version_major": 2, "version_minor": 0, "model_id": "be5ddd00fed64be4a3c9ad742b81607d"}
+{"version_major": 2, "version_minor": 0, "model_id": "6c047e9ef3a747558a4fb35591472773"}
 </script>
 </div>
 
@@ -14013,8 +14018,8 @@ var element = $('#c11ddf97-9d7b-4b4b-ad50-48c3cf157039');
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Saving time: 0:03:32.371776
-Alignment+Saving rate: 0.69 captures per second
+<pre>Saving time: 0:03:36.417433
+Alignment+Saving rate: 0.67 captures per second
 </pre>
 </div>
 </div>
@@ -14146,7 +14151,7 @@ Successfully updated stack metadata
  
 
 <script type="application/vnd.jupyter.widget-state+json">
-{"state": {"99dfcabf71bf43f2bd78d2c677bbd7f1": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "41dffb61d6504887881d3c8fe58d6411": {"model_name": "ProgressStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "0ea44ecda2d94b28baf7faf14d87e7d0": {"model_name": "FloatProgressModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "", "description": "Loading", "description_tooltip": null, "layout": "IPY_MODEL_99dfcabf71bf43f2bd78d2c677bbd7f1", "max": 1.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_41dffb61d6504887881d3c8fe58d6411", "value": 1.0}}, "e63ecfa0ad9944e697901da31c4eab68": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "c9f94231f07b435582d9989210828a05": {"model_name": "ProgressStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "be5ddd00fed64be4a3c9ad742b81607d": {"model_name": "FloatProgressModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "", "description": "Saving", "description_tooltip": null, "layout": "IPY_MODEL_e63ecfa0ad9944e697901da31c4eab68", "max": 1.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_c9f94231f07b435582d9989210828a05", "value": 1.0}}}, "version_major": 2, "version_minor": 0}
+{"state": {"498a5cd4a32444d5943d19c216ae78e5": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "8bcad8e8e4b5415897b9cd673a7f28cb": {"model_name": "ProgressStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "9eceac4218b24d94936f1f2f208cfd42": {"model_name": "FloatProgressModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "", "description": "Loading", "description_tooltip": null, "layout": "IPY_MODEL_498a5cd4a32444d5943d19c216ae78e5", "max": 1.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_8bcad8e8e4b5415897b9cd673a7f28cb", "value": 1.0}}, "9b74db5c78c243ecb0fe8c5cfd5c8b57": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "1.2.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "1.2.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "overflow_x": null, "overflow_y": null, "padding": null, "right": null, "top": null, "visibility": null, "width": "100%"}}, "0354815659e0496fa7021bedb41f76d0": {"model_name": "ProgressStyleModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "ProgressStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "1.2.0", "_view_name": "StyleView", "bar_color": null, "description_width": ""}}, "6c047e9ef3a747558a4fb35591472773": {"model_name": "FloatProgressModel", "model_module": "@jupyter-widgets/controls", "model_module_version": "1.5.0", "state": {"_dom_classes": [], "_model_module": "@jupyter-widgets/controls", "_model_module_version": "1.5.0", "_model_name": "FloatProgressModel", "_view_count": null, "_view_module": "@jupyter-widgets/controls", "_view_module_version": "1.5.0", "_view_name": "ProgressView", "bar_style": "", "description": "Saving", "description_tooltip": null, "layout": "IPY_MODEL_9b74db5c78c243ecb0fe8c5cfd5c8b57", "max": 1.0, "min": 0.0, "orientation": "horizontal", "style": "IPY_MODEL_0354815659e0496fa7021bedb41f76d0", "value": 1.0}}}, "version_major": 2, "version_minor": 0}
 </script>
 
 
