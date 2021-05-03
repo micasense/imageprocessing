@@ -213,7 +213,7 @@ def align_capture(capture, ref_index=1, warp_mode=cv2.MOTION_HOMOGRAPHY, max_ite
                                     'epsilon_threshold': epsilon_threshold,
                                     'ref_index':ref_index,
                                     'ref_image': ref_img,
-                                    'match_index':img.band_index,
+                                    'match_index':i,
                                     'match_image':img.undistorted(img.radiance()).astype('float32'),
                                     'translations': translations,
                                     'warp_matrix_init': np.array(warp_matrices_init[i], dtype=np.float32),

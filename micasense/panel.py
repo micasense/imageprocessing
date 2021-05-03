@@ -195,7 +195,7 @@ class Panel(object):
         """
         Return panel region coordinates in a predictable order. Panel region coordinates that are automatically
         detected by the camera are ordered differently than coordinates detected by Panel.panel_corners().
-        :return: [ (ur), (ul), (ll), (lr) ] to mirror Image.panel_region attribute order
+        :return: [ (lr), (ll), (ul), (ur) ] to mirror Image.panel_region attribute order
         """
         pc = self.panel_corners()
         pc = sorted(pc, key=lambda x: x[0])
