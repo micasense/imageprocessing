@@ -27,6 +27,7 @@ And then:
 git clone https://github.com/micasense/imageprocessing
 cd imageprocessing
 conda env create -f micasense_conda_env.yml # or pip install .
+conda activate micasense
 jupyter notebook .
 ```
 
