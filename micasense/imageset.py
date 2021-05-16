@@ -28,6 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import fnmatch
 import os
+import warnings
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial
 from pprint import pprint
@@ -37,6 +38,8 @@ from tqdm import tqdm
 
 import micasense.capture as capture
 import micasense.image as image
+
+warnings.simplefilter(action="once")
 
 
 # FIXME: mirrors Capture.append_file(). Not used. Does this still belong here?
@@ -129,15 +132,20 @@ class ImageSet(object):
         :param exiftool_path: str system file path to exiftool location
         :return: ImageSet instance
         """
+
+        if progress_callback is not None:
+            warnings.warn(message='The progress_callback parameter will be deprecated in favor of use_tqdm',
+                          category=PendingDeprecationWarning)
+
         cls.basedir = directory
         matches = []
-        for root, dirnames, filenames in os.walk(directory):
+        for root, _, filenames in os.walk(directory):
             [matches.append(os.path.join(root, filename)) for filename in fnmatch.filter(filenames, '*.tif')]
 
         images = []
 
-        if use_tqdm:  # to use tqdm progress bar instead of progress_callback
-            with exiftool.ExifTool(exiftool_path) as exift:
+        with exiftool.ExifTool(exiftool_path) as exift:
+            if use_tqdm:  # to use tqdm progress bar instead of progress_callback
                 kwargs = {
                     'total': len(matches),
                     'unit': ' Files',
@@ -146,8 +154,7 @@ class ImageSet(object):
                 }
                 for path in tqdm(iterable=matches, desc='Loading ImageSet', **kwargs):
                     images.append(image.Image(path, exiftool_obj=exift))
-        else:
-            with exiftool.ExifTool(exiftool_path) as exift:
+            else:
                 print('Loading ImageSet from: {}'.format(directory))
                 for i, path in enumerate(matches):
                     images.append(image.Image(path, exiftool_obj=exift))
@@ -176,7 +183,7 @@ class ImageSet(object):
 
     def as_nested_lists(self):
         """
-        Get timestamp, latitude, longitude, altitude, capture_id, dls-yaw, dls-pitch, dls-roll, irradiance from all
+        Get timestamp, latitude, longitude, altitude, capture_id, dls-yaw, dls-pitch, dls-roll, and irradiance from all
         Captures.
         :return: List data from all Captures, List column headers.
         """
@@ -233,6 +240,10 @@ class ImageSet(object):
         :param progress_callback: function to report progress to
         :param use_tqdm: boolean True to use tqdm progress bar
         """
+
+        if progress_callback is not None:
+            warnings.warn(message='The progress_callback parameter will be deprecated in favor of use_tqdm',
+                          category=PendingDeprecationWarning)
 
         # ensure some output is requested
         if output_stack_directory is None and output_rgb_directory is None:
