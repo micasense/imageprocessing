@@ -133,9 +133,14 @@ class ImageSet(object):
         :return: ImageSet instance
         """
 
+        # progress_callback deprecation warning
         if progress_callback is not None:
             warnings.warn(message='The progress_callback parameter will be deprecated in favor of use_tqdm',
                           category=PendingDeprecationWarning)
+
+        # ensure exiftoolpath is found per MicaSense setup instructions
+        if exiftool_path is None and os.environ.get('exiftoolpath') is not None:
+            exiftool_path = os.path.normpath(os.environ.get('exiftoolpath'))
 
         cls.basedir = directory
         matches = []
