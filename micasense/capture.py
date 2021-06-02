@@ -586,8 +586,9 @@ class Capture(object):
                 # scale data from float degC to back to centi-Kelvin to fit into uint16
                 out_data = (self.__aligned_capture[:, :, in_band] + 273.15) * 100 if gdal_type == 2 \
                     else self.__aligned_capture[:, :, in_band]
-                out_data[out_data < 0] = 0
-                out_data[out_data > 65535] = 65535
+                if gdal_type == 2:
+                    out_data[out_data < 0] = 0
+                    out_data[out_data > 65535] = 65535
                 out_band.WriteArray(out_data)
                 out_band.FlushCache()
         finally:
@@ -651,6 +652,9 @@ class Capture(object):
             # if GDT_UInt16, scale data from float degC to back to centi-Kelvin to fit into UInt16.
             out_data = (self.__aligned_capture[:, :, i] + 273.15) * 100 if gdal_type == 2 \
                 else self.__aligned_capture[:, :, i]
+            if gdal_type == 2:
+                out_data[out_data < 0] = 0
+                out_data[out_data > 65535] = 65535
             out_band.WriteArray(out_data)
             out_band.FlushCache()
 
