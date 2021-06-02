@@ -82,27 +82,26 @@ def parallel_process(function, iterable, parameters, progress_callback=None, use
 
 def save_capture(params, cap):
     """
-    Process an ImageSet according to program parameters. Saves rgb
-    :param params: dict of program parameters from ImageSet.process_imageset()
+    Convenience function to save Captures in an ImageSet according to input parameters.
+    :param params: dict of input parameters from ImageSet.process_imageset()
     :param cap: micasense.capture.Capture object
     """
     try:
         # align capture
         if len(cap.images) == params['capture_len']:
             cap.create_aligned_capture(
-                irradiance_list=params['irradiance'],
-                warp_matrices=params['warp_matrices'],
-                img_type=params['img_type']
+                img_type=params['img_type'],
+                irradiance_list=params['irradiance_list'],
+                warp_matrices=params['warp_matrices']
             )
         else:
             print(f"\tCapture {cap.uuid} only has {len(cap.images)} Images. Should have {params['capture_len']}. "
                   f"Skipping...")
             return
-
         if params['output_stack_dir']:
             output_stack_file_path = os.path.join(params['output_stack_dir'], cap.uuid + '.tif')
             if params['overwrite'] or not os.path.exists(output_stack_file_path):
-                cap.save_capture_as_stack(output_stack_file_path)
+                cap.save_capture_as_stack(output_stack_file_path, out_data_type=params['out_data_type'])
         if params['output_rgb_dir']:
             output_rgb_file_path = os.path.join(params['output_rgb_dir'], cap.uuid + '.jpg')
             if params['overwrite'] or not os.path.exists(output_rgb_file_path):
@@ -224,28 +223,40 @@ class ImageSet(object):
         return series
 
     def process_imageset(self,
+                         img_type,
                          output_stack_directory=None,
                          output_rgb_directory=None,
                          warp_matrices=None,
-                         irradiance=None,
-                         img_type=None,
+                         irradiance_list=None,
+                         out_data_type='GDT_UInt16',
                          multiprocess=True,
                          overwrite=False,
                          progress_callback=None,
                          use_tqdm=False):
         """
         Write band stacks and rgb thumbnails to disk.
+        :param img_type: str 'radiance' or 'reflectance'. Desired image output type.
+            - A 'radiance' value will output EO Images as radiance floating point values,
+             and LWIR Images in floating point Celsius.
+            - A 'reflectance' value will output EO Images as reflectance  UInt16
+             and LWIR Images as UInt16 centi-Kelvin using the provided irradiance_list.
         :param warp_matrices: 2d List of warp matrices derived from Capture.get_warp_matrices()
         :param output_stack_directory: str system file path to output stack directory
         :param output_rgb_directory: str system file path to output thumbnail directory
-        :param irradiance: List returned from Capture.dls_irradiance() or Capture.panel_irradiance()    <-- TODO: Write a better docstring for this
-        :param img_type: str 'radiance' or 'reflectance'. Desired image output type.
+        :param irradiance_list: List returned from Capture.dls_irradiance() or Capture.panel_irradiance()    <-- TODO: Write a better docstring for this
+        :param out_data_type: str GDT_Float32 or GDT_UInt16
+            Default: GDT_UInt16 will write images as scaled reflectance values. EO (32769=100%)
+            and LWIR in centi-Kelvin (0-65535).
+            GDT_Float32 will write images as floating point reflectance values. EO (1.0=100%)
+            and LWIR in floating point Celsius.
+            https://gdal.org/api/raster_c_api.html#_CPPv412GDALDataType
         :param multiprocess: boolean True to use multiprocessing module
         :param overwrite: boolean True to overwrite existing files
         :param progress_callback: function to report progress to
         :param use_tqdm: boolean True to use tqdm progress bar
         """
 
+        # progress_callback deprecation warning
         if progress_callback is not None:
             warnings.warn(message='The progress_callback parameter will be deprecated in favor of use_tqdm',
                           category=PendingDeprecationWarning)
@@ -253,6 +264,17 @@ class ImageSet(object):
         # ensure some output is requested
         if output_stack_directory is None and output_rgb_directory is None:
             raise RuntimeError('No output requested for the ImageSet.')
+
+        # ensure output type makes sense
+        if img_type not in ['radiance', 'reflectance']:
+            raise RuntimeError('Unknown img_type output requested: {}\nMust be "radiance" or "reflectance".'
+                               .format(img_type))
+
+        # warn user if only DLS metadata used in reflectance processing.
+        if img_type == 'reflectance' and irradiance_list is None:
+            warnings.warn(message='Reflectance output requested, but no irradiance_list value given. '
+                                  'Attempting to process reflectance from DLS metadata...',
+                          category=UserWarning)
 
         # make output dirs if not exist
         if output_stack_directory is not None and not os.path.exists(output_stack_directory):
@@ -263,8 +285,9 @@ class ImageSet(object):
         # processing parameters
         params = {
             'warp_matrices': warp_matrices,
-            'irradiance': irradiance,
+            'irradiance_list': irradiance_list,
             'img_type': img_type,
+            'out_data_type': out_data_type,
             'capture_len': len(self.captures[0].images),
             'output_stack_dir': output_stack_directory,
             'output_rgb_dir': output_rgb_directory,
@@ -272,7 +295,6 @@ class ImageSet(object):
         }
 
         print('Processing {} Captures ...'.format(len(self.captures)))
-
         # multiprocessing with concurrent futures
         if multiprocess:
             parallel_process(function=save_capture, iterable=self.captures, parameters=params,
