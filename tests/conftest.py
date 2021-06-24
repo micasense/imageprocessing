@@ -102,6 +102,17 @@ def panel_image_name_red():
     return os.path.join(image_path, 'IMG_0000_2.tif')
 
 @pytest.fixture()
+def panel_image_name_RP06_blue():
+    image_path = os.path.join('data', '0002SET', '000')
+    return os.path.join(image_path, 'IMG_0183_1.tif')
+
+@pytest.fixture()
+def panel_images_RP06():
+    image_path = os.path.join('data', '0002SET', '000')
+    return glob.glob(os.path.join(image_path, 'IMG*.tif'))
+
+
+@pytest.fixture()
 def flight_image_name():
     image_path = os.path.join('data', '0000SET', '000')
     return os.path.join(image_path, 'IMG_0001_1.tif')
