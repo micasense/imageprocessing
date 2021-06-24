@@ -157,25 +157,52 @@ class Panel(object):
             return None
         
         if self.panel_version < 3:
-            reference_panel_pts = np.asarray([[894, 469], [868, 232], [630, 258], [656, 496]], 
-                                            dtype=np.int32)
-            reference_qr_pts = np.asarray([[898, 748], [880, 567], [701, 584], [718, 762]], 
-                                        dtype=np.int32)
-        elif self.panel_version >= 3:
-            reference_panel_pts = np.asarray([[557, 350], [550, 480], [695, 480], [700, 350]], dtype=np.int32)
-            reference_qr_pts = np.asarray([[821, 324], [819, 506], [996, 509], [999, 330]], dtype=np.int32) 
-
+            # reference_panel_pts = np.asarray([[894, 469], [868, 232], [630, 258], [656, 496]], 
+            #                                 dtype=np.int32)
+            # reference_qr_pts = np.asarray([[898, 748], [880, 567], [701, 584], [718, 762]], 
+            #                             dtype=np.int32)
+            
+            # use the actual panel measures here - we use units of [mm]
+            # the panel is 154.4 x 152.4 mm , vs. the 84 x 84 mm for the QR code
+            # it is left 143.20 mm from the QR code 
+            # use the inner 50% square of the panel
+            s = 76.2
+            p = 42
+            T = np.array([-143.2,0])
+            
+        elif (self.panel_version >= 3) and (self.panel_version<6):
+            s = 50
+            p = 45
+            T = np.array([-145.8,0])
+            # reference_panel_pts = np.asarray([[557, 350], [550, 480], [695, 480], [700, 350]], dtype=np.int32)
+            # reference_qr_pts = np.asarray([[821, 324], [819, 506], [996, 509], [999, 330]], dtype=np.int32) 
+        elif self.panel_version >= 6 :
+            # use the actual panel measures here - we use units of [mm]
+            # the panel is 100 x 100 mm , vs. the 91 x 91 mm for the QR code
+            # it is down 125.94 mm from the QR code 
+            # use the inner 50% square of the panel
+            p = 41
+            s = 50
+            T = np.array([0,-130.84])
+           
+                     
+        reference_panel_pts = np.asarray([[-s, s], [s, s], [s, -s], [-s, -s]], dtype=np.float32)*.5+T
+        reference_qr_pts = np.asarray([[-p, p], [p, p], [p, -p], [-p, -p]], dtype=np.float32)
         bounds = []
         costs = []
         for rotation in range(0,4):
             qr_points = np.roll(reference_qr_pts, rotation, axis=0)
 
-            src = np.asarray([tuple(row) for row in qr_points[:3]], np.float32)
-            dst = np.asarray([tuple(row) for row in self.qr_corners()[:3]], np.float32)
-            warp_matrix = cv2.getAffineTransform(src, dst)
+            src = np.asarray([tuple(row) for row in qr_points[:]], np.float32)
+            dst = np.asarray([tuple(row) for row in self.qr_corners()[:]], np.float32)
+            
+            # we determine the homography from the 4 corner points
+            warp_matrix = cv2.getPerspectiveTransform(src,dst)
+            
+            #warp_matrix = cv2.getAffineTransform(src, dst)
 
-            pts = np.asarray([reference_panel_pts], 'int32')
-            panel_bounds = cv2.convexHull(cv2.transform(pts, warp_matrix), clockwise=False)
+            pts = np.asarray([reference_panel_pts], 'float32')
+            panel_bounds = cv2.convexHull(cv2.perspectiveTransform(pts, warp_matrix), clockwise=False)
             panel_bounds = np.squeeze(panel_bounds) # remove nested lists
             
             bounds_in_image = True
@@ -184,7 +211,7 @@ class Panel(object):
                     bounds_in_image = False
             if bounds_in_image:
                 mean, std, _, _ = self.region_stats(self.image.raw(),panel_bounds, sat_threshold=65000)
-                bounds.append(panel_bounds)
+                bounds.append(panel_bounds.astype(np.int32))
                 costs.append(std/mean)
 
         idx = costs.index(min(costs))
@@ -195,7 +222,7 @@ class Panel(object):
         """
         Return panel region coordinates in a predictable order. Panel region coordinates that are automatically
         detected by the camera are ordered differently than coordinates detected by Panel.panel_corners().
-        :return: [ (lr), (ll), (ul), (ur) ] to mirror Image.panel_region attribute order
+        :return: [ (ur), (ul), (ll), (lr) ] to mirror Image.panel_region attribute order
         """
         pc = self.panel_corners()
         pc = sorted(pc, key=lambda x: x[0])
