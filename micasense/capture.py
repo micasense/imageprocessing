@@ -552,6 +552,38 @@ class Capture(object):
         finally:
             out_raster = None
 
+    def save_bands_in_separate_file(self, outfilename, sort_by_wavelength=False,photometric='MINISBLACK'):
+        from osgeo.gdal import GetDriverByName, GDT_UInt16
+        if self.__aligned_capture is None:
+            raise RuntimeError("call Capture.create_aligned_capture prior to saving as stack")
+        rows, cols, bands = self.__aligned_capture.shape
+        driver = GetDriverByName('GTiff')      
+        
+        for i in range(0,5):
+            band_number = str(i+1)
+            outRaster = driver.Create(outfilename+'_'+band_number+'.tif', cols, rows, 1, GDT_UInt16, 
+                                  options = [ 'INTERLEAVE=BAND','COMPRESS=DEFLATE',f'PHOTOMETRIC={photometric}'])
+            outband = outRaster.GetRasterBand(1)
+            outdata = self.__aligned_capture[:,:,i]
+            outdata = outdata*32768
+            outdata[outdata<0] = 0
+            outdata[outdata>65535] = 65535
+            outband.WriteArray(outdata) 
+            outband.FlushCache()
+            outRaster = None
+
+        if bands == 6:
+            thermalRaster = driver.Create(outfilename+'_6.tif', cols, rows, 1, GDT_UInt16, 
+                                    options = [ 'INTERLEAVE=BAND','COMPRESS=DEFLATE',f'PHOTOMETRIC={photometric}'])
+            outband = thermalRaster.GetRasterBand(1)
+            outdata = (self.__aligned_capture[:,:,5]) * 100 
+            outdata[outdata<0] = 0
+            outdata[outdata>65535] = 65535
+            outband.WriteArray(outdata)
+            outband.FlushCache()
+            thermalRaster = None   
+
+
     def save_capture_as_rgb(self, out_file_name, gamma=1.4, downsample=1, white_balance='norm', hist_min_percent=0.5,
                             hist_max_percent=99.5, sharpen=True, rgb_band_indices=(2, 1, 0)):
         """
