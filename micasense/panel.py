@@ -35,7 +35,9 @@ import micasense.imageutils as imageutils
 
 class Panel(object):
 
-    def __init__(self, img,panelCorners=None):
+    def __init__(self, img,panelCorners=None,ignore_autocalibration=False):
+        # if we have panel images with QR metadata, panel detection is not called,
+        # so this can be forced here 
         if img is None:
             raise IOError("Must provide an image")
 
@@ -45,7 +47,7 @@ class Panel(object):
         self.gray8b = np.zeros(img.radiance().shape, dtype='uint8')
         cv2.convertScaleAbs(img.undistorted(img.radiance()), self.gray8b, 256.0/scale, -1.0*scale*bias)
         
-        if self.image.auto_calibration_image:
+        if (self.image.auto_calibration_image) and ~ignore_autocalibration:
             self.__panel_type = "auto" ## panels the camera found we call auto
             if panelCorners is not None:
                 self.__panel_bounds = np.array(panelCorners)
@@ -59,7 +61,9 @@ class Panel(object):
             self.saturated_panel_pixels_pct = None
             self.panel_pixels_mean = None
             self.panel_version = None
-            
+            if re.search(r'RP\d{2}-(\d{7})-\D{2}', self.image.panel_serial):
+                self.serial = self.image.panel_serial
+                self.panel_version = int(self.image.panel_serial[2:4])
         else:
             self.__panel_type = "search" ## panels we search for we call search
             self.serial = None
