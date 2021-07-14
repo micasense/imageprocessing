@@ -44,11 +44,11 @@ def ten_band_files_dir():
 
 @pytest.fixture()
 def panel_rededge_file_list(files_dir):
-    return glob.glob(os.path.join(files_dir, 'IMG_0000_*.tif'))
+    return sorted(glob.glob(os.path.join(files_dir, 'IMG_0000_*.tif')))
 
 @pytest.fixture()
 def non_panel_rededge_file_list(files_dir):
-    return glob.glob(os.path.join(files_dir, 'IMG_0001_*.tif'))
+    return sorted(glob.glob(os.path.join(files_dir, 'IMG_0001_*.tif')))
 
 @pytest.fixture()
 def bad_file_list(files_dir):
@@ -58,7 +58,7 @@ def bad_file_list(files_dir):
 
 @pytest.fixture()
 def panel_altum_file_list(altum_files_dir):
-    return glob.glob(os.path.join(altum_files_dir, 'IMG_0000_*.tif'))
+    return sorted(glob.glob(os.path.join(altum_files_dir, 'IMG_0000_*.tif')))
 
 @pytest.fixture()
 def panel_rededge_capture(panel_rededge_file_list):
@@ -70,11 +70,11 @@ def non_panel_rededge_capture(non_panel_rededge_file_list):
 
 @pytest.fixture()
 def panel_10band_rededge_file_list(ten_band_files_dir):
-    return glob.glob(os.path.join(ten_band_files_dir, 'IMG_0000_*.tif'))
+    return sorted(glob.glob(os.path.join(ten_band_files_dir, 'IMG_0000_*.tif')))
 
 @pytest.fixture()
 def flight_10band_rededge_file_list(ten_band_files_dir):
-    return glob.glob(os.path.join(ten_band_files_dir, 'IMG_0431_*.tif'))
+    return sorted(glob.glob(os.path.join(ten_band_files_dir, 'IMG_0431_*.tif')))
 
 @pytest.fixture()
 def panel_altum_capture(panel_altum_file_list):
@@ -83,7 +83,7 @@ def panel_altum_capture(panel_altum_file_list):
 
 @pytest.fixture()
 def non_panel_altum_file_list(altum_files_dir):
-    return glob.glob(os.path.join(altum_files_dir, 'IMG_0008_*.tif'))
+    return sorted(glob.glob(os.path.join(altum_files_dir, 'IMG_0008_*.tif')))
 
 @pytest.fixture()
 def non_panel_altum_capture(non_panel_altum_file_list):
@@ -109,7 +109,7 @@ def panel_image_name_RP06_blue():
 @pytest.fixture()
 def panel_images_RP06():
     image_path = os.path.join('data', '0002SET', '000')
-    return glob.glob(os.path.join(image_path, 'IMG*.tif'))
+    return sorted(glob.glob(os.path.join(image_path, 'IMG*.tif')))
 
 
 @pytest.fixture()
