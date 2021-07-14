@@ -104,7 +104,7 @@ def panel_image_name_red():
 @pytest.fixture()
 def panel_image_name_RP06_blue():
     image_path = os.path.join('data', '0002SET', '000')
-    return os.path.join(image_path, 'IMG_0183_1.tif')
+    return os.path.join(image_path, 'IMG_0000_1.tif')
 
 @pytest.fixture()
 def panel_images_RP06():
