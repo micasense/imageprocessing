@@ -35,22 +35,30 @@ def test_RP06_panel_ID(panel_image_name_RP06_blue):
     pan = panel.Panel(img)
     qr_corners = pan.qr_corners()
     assert pan.panel_version == 6
+   
+def test_RP06_panel_ID_autodetect(panel_image_name_RP06_blue):
+    img = image.Image(panel_image_name_RP06_blue)
+    pan = panel.Panel(img,ignore_autocalibration=True)
+    qr_corners = pan.qr_corners()
     
+    assert pan.panel_version == 6
 def test_RP06_panel_raw(panel_images_RP06):
-    test_mean = [35149,41064,39046,42419,37266]
-    test_std = [607,680,534,560,507]
-    test_num = [2484,2543,2100,2408,2358]
+    test_mean = [33082,34347,33971,34186,33371]
+    test_std = [474.7,582.6,476.3,464,658.9]
+    test_num = [3616,3552,3669,3612,3729]
     test_sat = [0,0,0,0,0]
     for i,m,s,n,sa in zip(panel_images_RP06,test_mean,test_std,test_num,test_sat):
          img = image.Image(i)
          pan = panel.Panel(img)
          mean, std, num, sat = pan.raw()
-         #print('mean {:f} std {:f} num {:f} sat {:f}'.format(mean,std,num,sat))
-         #print('m {:f} s {:f} n {:f} sa {:f}'.format(m,s,n,sa))
+         assert pan.panel_detected()
+         print('mean {:f} std {:f} num {:f} sat {:f}'.format(mean,std,num,sat))
+         print('m {:f} s {:f} n {:f} sa {:f}'.format(m,s,n,sa))
          assert mean == pytest.approx(m,rel=0.1)
          assert std == pytest.approx(s,rel=0.1)
          assert num == pytest.approx(n,rel=0.1)
          assert sat == pytest.approx(sa,rel=0.1)
+
         
 
 def test_qr_corners(panel_image_name):
