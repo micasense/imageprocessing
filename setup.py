@@ -29,7 +29,7 @@ setup(name='micasense',
           'matplotlib',
           'scikit-image',
           'packaging',
-          'pyexiftool',
+          'pyexiftool<=0.4.13',
           'pytz',
           'pyzbar',
           'tqdm'
