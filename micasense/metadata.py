@@ -123,18 +123,21 @@ class Metadata(object):
     def utc_time(self):
         ''' Get the timezone-aware datetime of the image capture '''
         str_time = self.get_item('EXIF:DateTimeOriginal')
-        utc_time = datetime.strptime(str_time, "%Y:%m:%d %H:%M:%S")
-        subsec = int(self.get_item('EXIF:SubSecTime'))
-        negative = 1.0
-        if subsec < 0:
-            negative = -1.0
-            subsec *= -1.0
-        subsec = float('0.{}'.format(int(subsec)))
-        subsec *= negative
-        ms = subsec * 1e3
-        utc_time += timedelta(milliseconds = ms)
-        timezone = pytz.timezone('UTC')
-        utc_time = timezone.localize(utc_time)
+        if str_time is not None:
+            utc_time = datetime.strptime(str_time, "%Y:%m:%d %H:%M:%S")
+            subsec = int(self.get_item('EXIF:SubSecTime'))
+            negative = 1.0
+            if subsec < 0:
+                negative = -1.0
+                subsec *= -1.0
+            subsec = float('0.{}'.format(int(subsec)))
+            subsec *= negative
+            ms = subsec * 1e3
+            utc_time += timedelta(milliseconds = ms)
+            timezone = pytz.timezone('UTC')
+            utc_time = timezone.localize(utc_time)
+        else:
+            utc_time = None
         return utc_time
 
     def dls_pose(self):
