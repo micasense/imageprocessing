@@ -125,7 +125,7 @@ def test_panel_radiance(panel_rededge_capture):
                     0.13081077851565506]
     assert len(rad) == len(expected_rad)
     for i,_ in enumerate(expected_rad):
-        assert rad[i] == pytest.approx(expected_rad[i], rel=0.001)
+        assert rad[i] == pytest.approx(expected_rad[i], rel=0.01)
 
 def test_panel_raw(panel_rededge_capture):
     raw = panel_rededge_capture.panel_raw()
@@ -137,7 +137,7 @@ def test_panel_raw(panel_rededge_capture):
                     54479.170371812339]
     assert len(raw) == len(expected_raw)
     for i,_ in enumerate(expected_raw):
-        assert raw[i] == pytest.approx(expected_raw[i], rel=0.001)
+        assert raw[i] == pytest.approx(expected_raw[i], rel=0.01)
 
 def test_panel_irradiance(panel_rededge_capture):
     panel_reflectance_by_band = [0.67, 0.69, 0.68, 0.61, 0.67]
@@ -145,7 +145,7 @@ def test_panel_irradiance(panel_rededge_capture):
     expected_rad = [0.79845135523772681, 0.81681533164998943, 0.74944205649335915, 0.54833776619262586, 0.61336444894797537]
     assert len(rad) == len(expected_rad)
     for i,_ in enumerate(expected_rad):
-        assert rad[i] == pytest.approx(expected_rad[i], rel=0.001)
+        assert rad[i] == pytest.approx(expected_rad[i], rel=0.01)
 
 def test_panel_albedo_not_preset(panel_rededge_capture):
     assert panel_rededge_capture.panels_in_all_expected_images()

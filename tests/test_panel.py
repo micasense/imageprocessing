@@ -30,6 +30,37 @@ import micasense.image as image
 import micasense.panel as panel
 import operator
 
+def test_RP06_panel_ID(panel_image_name_RP06_blue):
+    img = image.Image(panel_image_name_RP06_blue)
+    pan = panel.Panel(img)
+    qr_corners = pan.qr_corners()
+    assert pan.panel_version == 6
+   
+def test_RP06_panel_ID_autodetect(panel_image_name_RP06_blue):
+    img = image.Image(panel_image_name_RP06_blue)
+    pan = panel.Panel(img,ignore_autocalibration=True)
+    qr_corners = pan.qr_corners()
+    
+    assert pan.panel_version == 6
+def test_RP06_panel_raw(panel_images_RP06):
+    test_mean = [33082,34347,33971,34186,33371]
+    test_std = [474.7,582.6,476.3,464,658.9]
+    test_num = [3616,3552,3669,3612,3729]
+    test_sat = [0,0,0,0,0]
+    for i,m,s,n,sa in zip(panel_images_RP06,test_mean,test_std,test_num,test_sat):
+         img = image.Image(i)
+         pan = panel.Panel(img)
+         mean, std, num, sat = pan.raw()
+         assert pan.panel_detected()
+         print('mean {:f} std {:f} num {:f} sat {:f}'.format(mean,std,num,sat))
+         print('m {:f} s {:f} n {:f} sa {:f}'.format(m,s,n,sa))
+         assert mean == pytest.approx(m,rel=0.1)
+         assert std == pytest.approx(s,rel=0.1)
+         assert num == pytest.approx(n,rel=0.1)
+         assert sat == pytest.approx(sa,rel=0.1)
+
+        
+
 def test_qr_corners(panel_image_name):
     img = image.Image(panel_image_name)
     pan = panel.Panel(img)
@@ -47,7 +78,8 @@ def test_panel_corners(panel_image_name):
     img = image.Image(panel_image_name)
     pan = panel.Panel(img)
     panel_pts = pan.panel_corners()
-    good_pts = [[809, 613], [648, 615], [646, 454], [808, 452]]
+    good_pts = [[785,594],[674,593],[673,483],[783,484]]
+
     assert panel_pts is not None
     assert len(panel_pts) == len(good_pts)
     assert pan.serial == 'RP02-1603036-SC'
@@ -102,8 +134,8 @@ def test_raw_panel(panel_image_name):
     pan = panel.Panel(img)
     mean, std, num, sat = pan.raw()
     assert mean == pytest.approx(45406.0, rel=0.01)
-    assert std == pytest.approx(738.0, rel=0.05)
-    assert num == pytest.approx(26005, rel=0.02)
+    assert std == pytest.approx(689.0, rel=0.05)
+    assert num == pytest.approx(12154, rel=0.02)
     assert sat == pytest.approx(0, abs=2)
 
 def test_intensity_panel(panel_image_name):
@@ -111,8 +143,8 @@ def test_intensity_panel(panel_image_name):
     pan = panel.Panel(img)
     mean, std, num, sat = pan.intensity()
     assert mean == pytest.approx(1162, rel=0.01)
-    assert std == pytest.approx(23, rel=0.03)
-    assert num == pytest.approx(26005, rel=0.02)
+    assert std == pytest.approx(20, rel=0.03)
+    assert num == pytest.approx(12154, rel=0.02)
     assert sat == pytest.approx(0, abs=2)
 
 def test_radiance_panel(panel_image_name):
@@ -120,8 +152,8 @@ def test_radiance_panel(panel_image_name):
     pan = panel.Panel(img)
     mean, std, num, sat = pan.radiance()
     assert mean == pytest.approx(0.170284, rel=0.01)
-    assert std == pytest.approx(0.0033872969661854742, rel=0.02)
-    assert num == pytest.approx(26005, rel=0.02)
+    assert std == pytest.approx(0.0029387953691472554, rel=0.02)
+    assert num == pytest.approx(12154, rel=0.02)
     assert sat == pytest.approx(0, abs=2)
 
 def test_irradiance_mean(panel_image_name):
@@ -129,7 +161,7 @@ def test_irradiance_mean(panel_image_name):
     pan = panel.Panel(img)
     panel_reflectance = 0.67
     mean = pan.irradiance_mean(panel_reflectance)
-    assert mean == pytest.approx(0.7984, rel=0.001)
+    assert mean == pytest.approx(0.7984, rel=0.01)
     
 def test_panel_detected(panel_image_name):
     img = image.Image(panel_image_name)
