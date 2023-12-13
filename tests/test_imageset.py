@@ -23,30 +23,35 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+import os
 
 import pytest
-import os, glob
 
-import micasense.imageset as imageset
 import micasense.capture as capture
-import micasense.image as image
+import micasense.imageset as imageset
+
 
 @pytest.fixture()
 def files_dir():
-    return os.path.join('data', '0000SET', '000')
+    return os.path.join('data', 'REDEDGE-MX')
+
 
 progress_val = 0.0
+
+
 def progress(p):
     global progress_val
     progress_val = p
-    
+
+
 def test_from_captures(files_dir):
-    file1 = os.path.join(files_dir, 'IMG_0000_1.tif')
-    file2 = os.path.join(files_dir, 'IMG_0001_1.tif')
+    file1 = os.path.join(files_dir, 'IMG_0001_1.tif')
+    file2 = os.path.join(files_dir, 'IMG_0020_1.tif')
     cap1 = capture.Capture.from_file(file1)
     cap2 = capture.Capture.from_file(file2)
-    imgset = imageset.ImageSet([cap1,cap2])
+    imgset = imageset.ImageSet([cap1, cap2])
     assert imgset.captures is not None
+
 
 def test_from_directory(files_dir):
     global progress_val
@@ -56,12 +61,14 @@ def test_from_directory(files_dir):
     assert progress_val == 1.0
     assert len(imgset.captures) == 2
 
+
 def test_as_nested_lists(files_dir):
     imgset = imageset.ImageSet.from_directory(files_dir)
     assert imgset is not None
     data, columns = imgset.as_nested_lists()
-    assert data[0][1] == 36.576096
+    assert data[0][1] == 47.7036143
     assert columns[0] == 'timestamp'
+
 
 def test_10_band_from_dir(ten_band_files_dir):
     imgset = imageset.ImageSet.from_directory(ten_band_files_dir, progress)

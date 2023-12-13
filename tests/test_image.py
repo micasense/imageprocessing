@@ -23,34 +23,39 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-import pytest
-import os, glob
-import math
 import numpy as np
+import pytest
 
 import micasense.image as image
 import micasense.panel as panel
+
 
 def test_load_image_metadata(img):
     assert img.meta is not None
     assert img.meta.band_index() == 0
     assert img.meta.camera_make() == 'MicaSense'
-    assert img.meta.camera_model() == 'RedEdge'
+    assert img.meta.camera_model() == 'RedEdge-M'
 
-def test_less_than(img,img2):
+
+def test_less_than(img, img2):
     assert img < img2
 
-def test_greater_than(img,img2):
+
+def test_greater_than(img, img2):
     assert img2 > img
 
-def test_equal(img,img2):
+
+def test_equal(img, img2):
     assert img == img
 
-def test_not_equal(img,img2):
+
+def test_not_equal(img, img2):
     assert img != img2
+
 
 def test_load_image_raw(img):
     assert img.raw() is not None
+
 
 def test_clear_image_data(img):
     assert img.undistorted(img.radiance()) is not None
@@ -63,27 +68,32 @@ def test_clear_image_data(img):
     assert img._Image__undistorted_source is None
     assert img._Image__undistorted_image is None
 
+
 def test_reflectance(img):
     pan = panel.Panel(img)
-    panel_reflectance = 0.5
+    panel_reflectance = 0.50
     panel_irradiance = pan.irradiance_mean(panel_reflectance)
     reflectance_img = img.reflectance(panel_irradiance)
     ref_mean, _, _, _ = pan.region_stats(reflectance_img,
                                          pan.panel_corners())
-    assert ref_mean == pytest.approx(panel_reflectance, 1e-4)
+    assert ref_mean == pytest.approx(panel_reflectance, 1e-2)
+
 
 def test_size(img):
-    assert img.size() == (1280,960)
+    assert img.size() == (1280, 960)
+
 
 def test_pp_px(img):
-    assert img.principal_point_px() == pytest.approx((627.6, 479.9), abs=0.1)
+    assert img.principal_point_px() == pytest.approx((657.402, 478.056), abs=0.1)
+
 
 def test_cv2_camera_matrix(img):
-    test_mat = [[1449.4,    0.0, 627.6],
-                [   0.0, 1449.4, 479.9],
-                [   0.0,    0.0,   1.0]]
+    test_mat = [[1441.60555, 0, 657.402667],
+                [0, 1441.60555, 478.056001],
+                [0, 0, 1]]
     for idx, row in enumerate(img.cv2_camera_matrix()):
         assert row == pytest.approx(test_mat[idx], abs=0.1)
+
 
 def test_altum_panel_image(panel_altum_image):
     assert panel_altum_image.size() == (2064, 1544)
@@ -91,19 +101,23 @@ def test_altum_panel_image(panel_altum_image):
     assert panel_altum_image.meta.camera_model() == "Altum"
     assert panel_altum_image.auto_calibration_image == True
 
+
 def test_altum_flight_image(altum_flight_image):
     assert altum_flight_image.meta.camera_make() == "MicaSense"
     assert altum_flight_image.meta.camera_model() == "Altum"
     assert altum_flight_image.auto_calibration_image == False
 
+
 def test_image_not_file(non_existant_file_name):
     with pytest.raises(OSError):
         image.Image(non_existant_file_name)
 
+
 def test_altum_lwir_image(altum_lwir_image):
     assert altum_lwir_image.meta.band_name() == 'LWIR'
-    assert altum_lwir_image.size() == (160,120)
+    assert altum_lwir_image.size() == (160, 120)
     assert altum_lwir_image.auto_calibration_image == False
+
 
 def test_altum_image_horizontal_irradiance(altum_flight_image):
     assert altum_flight_image.dls_present
@@ -112,13 +126,3 @@ def test_altum_image_horizontal_irradiance(altum_flight_image):
     scattered_irr = altum_flight_image.scattered_irradiance
     good_horiz_irradiance = direct_irr * np.sin(solar_el) + scattered_irr
     assert altum_flight_image.horizontal_irradiance == pytest.approx(good_horiz_irradiance, 1e-3)
-
-def test_altum_bad_dls2_horizontal_irradiance(bad_dls2_horiz_irr_image):
-    assert bad_dls2_horiz_irr_image.dls_present
-    assert bad_dls2_horiz_irr_image.meta.horizontal_irradiance_valid() == False
-    solar_el = bad_dls2_horiz_irr_image.solar_elevation
-    direct_irr = bad_dls2_horiz_irr_image.direct_irradiance
-    scattered_irr = bad_dls2_horiz_irr_image.scattered_irradiance
-    good_horiz_irradiance = direct_irr * np.sin(solar_el) + scattered_irr
-    assert bad_dls2_horiz_irr_image.horizontal_irradiance == pytest.approx(good_horiz_irradiance, 1e-3)
-

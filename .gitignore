@@ -1,8 +1,6 @@
 # Add any directories, files, or patterns you don't want to be tracked by version control
 *.pyc
 .ipynb_checkpoints
-.vscode
-/.idea
 __pycache__
 /dist/
 /*.egg-info

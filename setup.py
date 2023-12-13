@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import codecs
 from setuptools import setup, find_packages
+import os
 
 # Parse the version from the main __init__.py
 with open('micasense/__init__.py') as f:
@@ -23,7 +25,7 @@ setup(name='micasense',
       install_requires=[
           'requests',
           'numpy',
-          'opencv-python',
+          'opencv-python-headless',
           'gdal',
           'pysolar',
           'matplotlib',
@@ -31,6 +33,6 @@ setup(name='micasense',
           'packaging',
           'pyexiftool<=0.4.13',
           'pytz',
-          'pyzbar',
-          'tqdm'
+          'pyzbar'
       ])
+
