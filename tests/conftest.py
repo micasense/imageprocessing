@@ -82,12 +82,12 @@ def non_panel_rededge_capture(non_panel_rededge_file_list):
 
 @pytest.fixture()
 def panel_10band_rededge_file_list(ten_band_files_dir: Path):
-    return glob.glob(str(ten_band_files_dir/'IMG_0001_*.tif'))
+    return glob.glob(str(ten_band_files_dir/'IMG_0000_*.tif'))
 
 
 @pytest.fixture()
 def flight_10band_rededge_file_list(ten_band_files_dir: Path):
-    return glob.glob(str(ten_band_files_dir/'IMG_0007_*.tif'))
+    return glob.glob(str(ten_band_files_dir/'IMG_0431_*.tif'))
 
 
 @pytest.fixture()

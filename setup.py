@@ -25,13 +25,13 @@ setup(name='micasense',
       install_requires=[
           'requests',
           'numpy',
-          'opencv-python-headless',
+          'opencv-python',
           'gdal',
           'pysolar',
           'matplotlib',
           'scikit-image',
           'packaging',
-          'pyexiftool<=0.4.13',
+          'pyexiftool',
           'pytz',
           'pyzbar'
       ])

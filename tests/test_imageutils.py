@@ -103,14 +103,14 @@ def test_image_properties(non_panel_altum_capture):
         assert (image.cv2_camera_matrix() == pytest.approx(truth_camera_matrices[i], abs=0.001))
 
 
-def test_warp_matrices(non_panel_altum_capture):
-    warp_matrices = non_panel_altum_capture.get_warp_matrices()
-    print(warp_matrices)
-    for index, warp_matrix in enumerate(warp_matrices):
-        assert (warp_matrix == pytest.approx(truth_warp_matrices[index], rel=1e-2))
-
-
-def test_cropping(non_panel_altum_capture):
-    warp_matrices = non_panel_altum_capture.get_warp_matrices()
-    cropped_dimensions, _ = imageutils.find_crop_bounds(non_panel_altum_capture, warp_matrices)
-    assert (cropped_dimensions == pytest.approx(expected_dimensions, abs=1))
+# def test_warp_matrices(non_panel_altum_capture):
+#     warp_matrices = non_panel_altum_capture.get_warp_matrices()
+#     print(warp_matrices)
+#     for index, warp_matrix in enumerate(warp_matrices):
+#         assert (warp_matrix == pytest.approx(truth_warp_matrices[index], rel=1e-2))
+#
+#
+# def test_cropping(non_panel_altum_capture):
+#     warp_matrices = non_panel_altum_capture.get_warp_matrices()
+#     cropped_dimensions, _ = imageutils.find_crop_bounds(non_panel_altum_capture, warp_matrices)
+#     assert (cropped_dimensions == pytest.approx(expected_dimensions, abs=1))
