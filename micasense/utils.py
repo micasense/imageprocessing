@@ -128,10 +128,10 @@ def correct_lens_distortion(meta, image):
     ndistortion = meta.size('XMP:PerspectiveDistortion')
     distortion_parameters = np.array([float(meta.get_item('XMP:PerspectiveDistortion', i)) for i in range(ndistortion)])
     # get the two principal points
-    pp = np.array(meta.get_item('XMP:PrincipalPoint').split(',')).astype(np.float)
+    pp = np.array(meta.get_item('XMP:PrincipalPoint').split(',')).astype(float)
     # values in pp are in [mm] and need to be rescaled to pixels
-    focal_plane_x_resolution = float(meta.get_item('EXIF:focal_plane_x_resolution'))
-    focal_plane_y_resolution = float(meta.get_item('EXIF:focal_plane_y_resolution'))
+    focal_plane_x_resolution = float(meta.get_item('EXIF:FocalPlaneXResolution'))
+    focal_plane_y_resolution = float(meta.get_item('EXIF:FocalPlaneYResolution'))
 
     cX = pp[0] * focal_plane_x_resolution
     cY = pp[1] * focal_plane_y_resolution

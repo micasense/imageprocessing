@@ -65,7 +65,7 @@ class Image(object):
     band of multispectral information
     """
 
-    def __init__(self, image_path, exiftool_obj=None, allow_uncalibrated=False):
+    def __init__(self, image_path: str, exiftool_obj=None, allow_uncalibrated=False):
         if not os.path.isfile(image_path):
             raise IOError("Provided path is not a file: {}".format(image_path))
         self.path = image_path
@@ -191,7 +191,7 @@ class Image(object):
         return self.horizontal_irradiance_from_direct_scattered()
 
     def compute_horizontal_irradiance_dls2(self):
-        """ Compute the proper solar elevation, solar azimuth, and horizontal irradiance 
+        """ Compute the proper solar elevation, solar azimuth, and horizontal irradiance
             for cases where the camera system did not do it correctly """
         _, _, _, \
             self.solar_elevation, \
@@ -373,7 +373,7 @@ class Image(object):
             yv = y.T / y_dim
             k = self.vignette_polynomial2D
             e = self.vignette_polynomial2Dexponents
-            p2 = np.zeros_like(xv, dtype=np.float)
+            p2 = np.zeros_like(xv, dtype=float)
             for i, c in enumerate(k):
                 ex = e[2 * i]
                 ey = e[2 * i + 1]

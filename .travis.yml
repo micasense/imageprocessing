@@ -7,10 +7,10 @@ before_install:
   # install library dependencies
   - sudo apt-get install libzbar0 make perl
   # Install exiftool
-  - wget https://cpan.metacpan.org/authors/id/E/EX/EXIFTOOL/Image-ExifTool-12.15.tar.gz
-  - tar -xzf Image-ExifTool-12.15.tar.gz
-  - pushd Image-ExifTool-12.15/
-  - perl Makefile.PL 
+  - wget https://cpan.metacpan.org/authors/id/E/EX/EXIFTOOL/Image-ExifTool-12.76.tar.gz
+  - tar -xzf Image-ExifTool-12.76.tar.gz
+  - pushd Image-ExifTool-12.76/
+  - perl Makefile.PL
   - make test
   - sudo make install
   - popd

@@ -24,6 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import os
+from pathlib import Path
 
 import pytest
 
@@ -33,7 +34,7 @@ import micasense.imageset as imageset
 
 @pytest.fixture()
 def files_dir():
-    return os.path.join('data', 'REDEDGE-MX')
+    return Path(__file__).parent.parent/'data'/'REDEDGE-MX'
 
 
 progress_val = 0.0

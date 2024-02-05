@@ -36,7 +36,7 @@ import pytz
 class Metadata(object):
     """ Container for Micasense image metadata"""
 
-    def __init__(self, filename, exiftool_path=None, exiftool_obj=None):
+    def __init__(self, filename: str, exiftool_path=None, exiftool_obj=None):
         if exiftool_obj is not None:
             self.exif = exiftool_obj.get_metadata(filename)
             return
@@ -48,7 +48,7 @@ class Metadata(object):
             self.exiftoolPath = None
         if not os.path.isfile(filename):
             raise IOError("Input path is not a file")
-        with exiftool.ExifTool(self.exiftoolPath) as exift:
+        with exiftool.ExifToolHelper() as exift:
             self.exif = exift.get_metadata(filename)
 
     def get_all(self):
@@ -59,10 +59,11 @@ class Metadata(object):
         """ Get metadata item by Namespace:Parameter"""
         val = None
         try:
-            val = self.exif[item]
+            assert len(self.exif) > 0
+            val = self.exif[0][item]
             if index is not None:
                 try:
-                    if isinstance(val, unicode):
+                    if isinstance(val, pytz.unicode):
                         val = val.encode('ascii', 'ignore')
                 except NameError:
                     # throws on python 3 where unicode is undefined
@@ -83,7 +84,7 @@ class Metadata(object):
         """get the size (length) of a metadata item"""
         val = self.get_item(item)
         try:
-            if isinstance(val, unicode):
+            if isinstance(val, pytz.unicode):
                 val = val.encode('ascii', 'ignore')
         except NameError:
             # throws on python 3 where unicode is undefined
@@ -132,7 +133,6 @@ class Metadata(object):
             if subsec < 0:
                 negative = -1.0
                 subsec *= -1.0
-            subsec = float('0.{}'.format(int(subsec)))
             subsec *= negative
             ms = subsec * 1e3
             utc_time += timedelta(milliseconds=ms)
@@ -336,7 +336,7 @@ class Metadata(object):
         return version.parse(version_string) >= version.parse(good_version)
 
     def spectral_irradiance(self):
-        """ Raw spectral irradiance measured by an irradiance sensor. 
+        """ Raw spectral irradiance measured by an irradiance sensor.
             Calibrated to W/m^2/nm using irradiance_scale_factor, but not corrected for angles """
         return self.__float_or_zero(self.get_item('XMP:SpectralIrradiance')) * self.irradiance_scale_factor()
 
@@ -379,7 +379,7 @@ class Metadata(object):
             self.panel_serial() is not None
 
     def panel_albedo(self):
-        """ Surface albedo of the active portion of the reflectance panel as calculated by the camera 
+        """ Surface albedo of the active portion of the reflectance panel as calculated by the camera
             (usually from the information in the panel QR code) """
         albedo = self.get_item('XMP:Albedo')
         if albedo is not None:
