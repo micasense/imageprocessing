@@ -509,7 +509,7 @@ def min_max(pts):
 
 def map_points(pts, image_size, warpMatrix, distortion_coeffs, camera_matrix, warp_mode=cv2.MOTION_HOMOGRAPHY):
     # extra dimension makes opencv happy
-    pts = np.array([pts], dtype=np.float)
+    pts = np.array([pts], dtype=float)
     new_cam_mat, _ = cv2.getOptimalNewCameraMatrix(camera_matrix, distortion_coeffs, image_size, 1)
     new_pts = cv2.undistortPoints(pts, camera_matrix, distortion_coeffs, P=new_cam_mat)
     if warp_mode == cv2.MOTION_AFFINE:
@@ -584,7 +584,7 @@ def radiometric_pan_sharpen(capture, warp_matrices=None, panchro_band=5, irradia
     # this function performs a radiometrically accurate pansharpening on the input capture
     # if no warp matrices are supplied to align the multispec images to the pan band
     # the camera calibration is used (which produces reasonably well aligned imagers in most cases)
-    # in addition to the pan sharpened stack, the equivalent upsampled stack is also produced 
+    # in addition to the pan sharpened stack, the equivalent upsampled stack is also produced
     # for comparison
     # use the warp matrices we have for the stack, if not user supplied
     if warp_matrices is None:
@@ -654,9 +654,9 @@ def radiometric_pan_sharpen(capture, warp_matrices=None, panchro_band=5, irradia
 def prepare_exif_for_stacks(thecapture, thefilename):
     lat, lon, alt = thecapture.location()
     resolution = thecapture.images[0].focal_plane_resolution_px_per_mm
-    # eventually it would be nice to add the capture ID, flight ID, 
+    # eventually it would be nice to add the capture ID, flight ID,
     # and yaw/pitch/roll, but these are non-standard exif tags,
-    # so it is more difficult. 
+    # so it is more difficult.
     attitude = thecapture.dls_pose()
     theid = thecapture.uuid
     flightid = thecapture.flightid

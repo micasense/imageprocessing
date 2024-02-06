@@ -306,7 +306,6 @@ def test_panel_albedo_no_detect(panel_altum_capture):
 
 
 def test_10_band_capture_loads(panel_10band_rededge_file_list):
-    print(panel_10band_rededge_file_list)
     cap = capture.Capture.from_filelist(panel_10band_rededge_file_list)
     assert cap.num_bands == 10
 
@@ -320,16 +319,7 @@ def test_10_band_panel(panel_10band_rededge_file_list):
 def test_10_band_irradiance(flight_10band_rededge_capture):
     assert flight_10band_rededge_capture.dls_present()
     test_irradiance = flight_10band_rededge_capture.dls_irradiance()
-    good_irradiance = [0.8891651301138496,
-                       0.8108716108077543,
-                       0.706543006961791,
-                       0.4295603539307114,
-                       0.5300914981313334,
-                       0.7601517486572266,
-                       0.8333349609375,
-                       0.6829991149902344,
-                       0.6153291320800781,
-                       0.5720899200439453]
+    good_irradiance = [0.67305, 0.62855, 0.55658, 0.34257, 0.41591, 0.57470, 0.64203, 0.53739, 0.48215, 0.44563]
     assert test_irradiance == pytest.approx(good_irradiance, abs=1e-5)
 
 

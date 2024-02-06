@@ -67,7 +67,7 @@ class ImageSet(object):
         if exiftool_path is None and os.environ.get('exiftoolpath') is not None:
             exiftool_path = os.path.normpath(os.environ.get('exiftoolpath'))
 
-        with exiftool.ExifTool(exiftool_path) as exift:
+        with exiftool.ExifToolHelper(exiftool_path) as exift:
             for i, path in enumerate(matches):
                 images.append(image.Image(path, exiftool_obj=exift, allow_uncalibrated=allow_uncalibrated))
                 if progress_callback is not None:

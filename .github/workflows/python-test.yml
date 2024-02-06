@@ -1,0 +1,47 @@
+name: Build and run Python unit tests
+
+on: push
+permissions:
+  contents: read
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.8'
+      - name: Add system deps and exiftool
+        run: |
+          sudo apt-get update
+          sudo apt-get install libzbar0 make perl
+          wget https://cpan.metacpan.org/authors/id/E/EX/EXIFTOOL/Image-ExifTool-12.76.tar.gz
+          tar -xzf Image-ExifTool-12.76.tar.gz
+          pushd Image-ExifTool-12.76/
+          perl Makefile.PL
+          make test
+          sudo make install
+          popd
+      - name: Add conda to system path
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          source "$CONDA/etc/profile.d/conda.sh"
+          hash -r
+          conda config --set always_yes yes --set changeps1 no
+          conda update -q conda
+          conda update -n base conda
+          conda info -a
+          conda env create -f micasense_conda_env.yml
+          conda activate micasense
+      - name: Test with pytest
+        run: |
+          source "$CONDA/etc/profile.d/conda.sh"
+          conda activate micasense
+          git lfs install
+          git lfs pull
+          pytest --junit-xml=test-results.xml
