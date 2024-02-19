@@ -77,33 +77,47 @@ def raw_image_to_radiance(meta, image_raw):
 
 
 def vignette_map(meta, x_dim, y_dim):
-    # get vignette center
-    x_vignette = float(meta.get_item('XMP:VignettingCenter', 0))
-    y_vignette = float(meta.get_item('XMP:VignettingCenter', 1))
-
-    # get vignette polynomial
-    nvignette_poly = meta.size('XMP:VignettingPolynomial')
-    vignette_poly_list = [float(meta.get_item('XMP:VignettingPolynomial', i)) for i in range(nvignette_poly)]
-
-    # reverse list and append 1., so that we can call with numpy polyval
-    vignette_poly_list.reverse()
-    vignette_poly_list.append(1.)
-    vignette_poly = np.array(vignette_poly_list)
-
-    # perform vignette correction
-    # get coordinate grid across image
+    # get coordinate grid across image, seem swapped because of transposed vignette
     x, y = np.meshgrid(np.arange(x_dim), np.arange(y_dim))
-
     # meshgrid returns transposed arrays
     x = x.T
     y = y.T
 
-    # compute matrix of distances from image center
-    r = np.hypot((x - x_vignette), (y - y_vignette))
+    vignetting_center_size = meta.size('XMP:VignettingCenter')
+    vignetting_polynomial_2d_size = meta.size('XMP:VignettingPolynomial2D')
 
-    # compute the vignette polynomial for each distance - we divide by the polynomial so that the
-    # corrected image is image_corrected = image_original * vignetteCorrection
-    vignette = 1. / np.polyval(vignette_poly, r)
+    # if we have a radial poly
+    if vignetting_center_size > 0:
+        # get vignette center
+        x_vignette = float(meta.get_item('XMP:VignettingCenter', 0))
+        y_vignette = float(meta.get_item('XMP:VignettingCenter', 1))
+
+        # get vignette polynomial
+        nvignette_poly = meta.size('XMP:VignettingPolynomial')
+        vignette_poly_list = [float(meta.get_item('XMP:VignettingPolynomial', i)) for i in range(nvignette_poly)]
+
+        # reverse list and append 1., so that we can call with numpy polyval
+        vignette_poly_list.reverse()
+        vignette_poly_list.append(1.)
+        vignette_poly = np.array(vignette_poly_list)
+
+        # compute matrix of distances from image center
+        r = np.hypot((x - x_vignette), (y - y_vignette))
+
+        # compute the vignette polynomial for each distance - we divide by the polynomial so that the
+        # corrected image is image_corrected = image_original * vignetteCorrection
+        vignette = 1. / np.polyval(vignette_poly, r)
+    elif vignetting_polynomial_2d_size > 0:  # 2d polynomial
+        xv = x.T / x_dim
+        yv = y.T / y_dim
+        k = meta.vignette_polynomial2D()
+        e = meta.vignette_polynomial2Dexponents()
+        p2 = np.zeros_like(xv, dtype=float)
+        for i, c in enumerate(k):
+            ex = e[2 * i]
+            ey = e[2 * i + 1]
+            p2 += c * xv ** ex * yv ** ey
+        vignette = (1. / p2).T
     return vignette, x, y
 
 
