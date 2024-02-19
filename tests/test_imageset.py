@@ -34,7 +34,7 @@ import micasense.imageset as imageset
 
 @pytest.fixture()
 def files_dir():
-    return Path(__file__).parent.parent/'data'/'REDEDGE-MX'
+    return Path(__file__).parent.parent / 'data' / 'REDEDGE-MX'
 
 
 progress_val = 0.0
