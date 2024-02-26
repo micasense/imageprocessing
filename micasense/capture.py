@@ -569,6 +569,9 @@ class Capture(object):
         :param photometric: str GDAL argument for GTiff color matching
         """
         from osgeo.gdal import GetDriverByName, GDT_UInt16
+        from osgeo import gdal
+        gdal.UseExceptions()
+
         if self.__aligned_capture is None and self.__aligned_radiometric_pan_sharpened_capture is None:
             raise RuntimeError(
                 "Call Capture.create_aligned_capture() prior to saving as stack.")
@@ -607,9 +610,8 @@ class Capture(object):
                 outdata = imageutils.normalize(aligned_cap[:, :, inband], multispec_min, multispec_max)
                 outdata[outdata < 0] = 0
                 outdata[outdata > 2] = 2  # limit reflectance data to 200% to allow some specular reflections
-                outdata = outdata * 32767  # scale reflectance images so 100% = 32768
-                outdata[outdata < 0] = 0
-                outdata[outdata > 65535] = 65535
+                outdata = outdata * 32767 # scale reflectance images so 100% = 32768
+                outdata = outdata.astype(np.ushort)
                 outband.SetDescription(eo_bands[outband_count])
                 outband.WriteArray(outdata)
                 outband.FlushCache()
@@ -618,12 +620,14 @@ class Capture(object):
                 outband = outRaster.GetRasterBand(len(eo_bands) + outband_count + 1)
                 outdata = (aligned_cap[:, :,
                            inband] + 273.15) * 100  # scale data from float degC to back to centi-Kelvin to fit into uint16
-                outband.SetDescription('LWIR')
                 outdata[outdata < 0] = 0
                 outdata[outdata > 65535] = 65535
+                outdata = outdata.astype(np.ushort)
+                outband.SetDescription('LWIR')
                 outband.WriteArray(outdata)
                 outband.FlushCache()
         finally:
+            outRaster.Close()
             if write_exif:
                 imageutils.write_exif_to_stack(self, outfilename)
 
