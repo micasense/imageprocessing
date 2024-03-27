@@ -602,12 +602,9 @@ class Capture(object):
 
             eo_count = len(eo_list)
 
-            multispec_min = np.min(np.percentile(aligned_cap[:, :, 1:eo_count].flatten(), 0.01))
-            multispec_max = np.max(np.percentile(aligned_cap[:, :, 1:eo_count].flatten(), 99.99))
-
             for outband_count, inband in enumerate(eo_list):
                 outband = outRaster.GetRasterBand(outband_count + 1)
-                outdata = imageutils.normalize(aligned_cap[:, :, inband], multispec_min, multispec_max)
+                outdata = self.__aligned_capture[:, :, inband]
                 outdata[outdata < 0] = 0
                 outdata[outdata > 2] = 2  # limit reflectance data to 200% to allow some specular reflections
                 outdata = outdata * 32767 # scale reflectance images so 100% = 32768
