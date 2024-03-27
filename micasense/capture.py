@@ -604,7 +604,7 @@ class Capture(object):
 
             for outband_count, inband in enumerate(eo_list):
                 outband = outRaster.GetRasterBand(outband_count + 1)
-                outdata = self.__aligned_capture[:, :, inband]
+                outdata = aligned_cap[:, :, inband]
                 outdata[outdata < 0] = 0
                 outdata[outdata > 2] = 2  # limit reflectance data to 200% to allow some specular reflections
                 outdata = outdata * 32767 # scale reflectance images so 100% = 32768
