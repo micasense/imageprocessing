@@ -128,11 +128,12 @@ class Metadata(object):
         str_time = self.get_item('EXIF:DateTimeOriginal')
         if str_time:
             utc_time = datetime.strptime(str_time, "%Y:%m:%d %H:%M:%S")
-            subsec = float(f"0.{self.get_item('EXIF:SubSecTime')}")
+            subsec = int(self.get_item('EXIF:SubSecTime'))
             negative = 1.0
             if subsec < 0:
                 negative = -1.0
                 subsec *= -1.0
+            subsec = float(f"0.{int(subsec)}")
             subsec *= negative
             ms = subsec * 1e3
             utc_time += timedelta(milliseconds=ms)

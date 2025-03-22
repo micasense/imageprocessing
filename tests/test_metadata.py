@@ -67,6 +67,11 @@ def test_utc_time(meta):
     assert utc_time is not None
     assert utc_time.strftime('%Y-%m-%d %H:%M:%S.%f') == '2022-04-06 18:50:25.983430'
 
+def test_utc_time_negative_subsec(meta_negative_subsec):
+    utc_time = meta_negative_subsec.utc_time()
+    assert utc_time is not None
+    assert utc_time.strftime('%Y-%m-%d %H:%M:%S.%f') == '2018-07-25 05:53:52.762886'
+
 
 def test_position(meta):
     assert meta.position() == pytest.approx((47.7036143, -122.1414373, 6.728))

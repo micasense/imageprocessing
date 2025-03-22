@@ -195,3 +195,7 @@ def meta_bad_exposure(rededge_files_dir: Path):
 @pytest.fixture()
 def meta_altum_dls2(altum_flight_image_name):
     return metadata.Metadata(altum_flight_image_name)
+
+@pytest.fixture()
+def meta_negative_subsec(rededge_files_dir: Path):
+    return metadata.Metadata(str(rededge_files_dir / 'IMG_0008_1.tif'))
