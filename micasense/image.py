@@ -28,6 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import math
 import os
+import logging
 
 import cv2
 import numpy as np
@@ -35,6 +36,8 @@ import numpy as np
 import micasense.dls as dls
 import micasense.metadata as metadata
 import micasense.plotutils as plotutils
+
+logger = logging.getLogger(__name__)
 
 
 # helper function to convert euler angles to a rotation matrix
@@ -46,15 +49,15 @@ def rotations_degrees_to_rotation_matrix(rotation_degrees):
     sy = np.sin(np.deg2rad(rotation_degrees[1]))
     sz = np.sin(np.deg2rad(rotation_degrees[2]))
 
-    Rx = np.mat([1, 0, 0,
-                 0, cx, -sx,
-                 0, sx, cx]).reshape(3, 3)
-    Ry = np.mat([cy, 0, sy,
-                 0, 1, 0,
-                 -sy, 0, cy]).reshape(3, 3)
-    Rz = np.mat([cz, -sz, 0,
-                 sz, cz, 0,
-                 0, 0, 1]).reshape(3, 3)
+    Rx = np.asmatrix([1, 0, 0,
+                      0, cx, -sx,
+                      0, sx, cx]).reshape(3, 3)
+    Ry = np.asmatrix([cy, 0, sy,
+                      0, 1, 0,
+                      -sy, 0, cy]).reshape(3, 3)
+    Rz = np.asmatrix([cz, -sz, 0,
+                      sz, cz, 0,
+                      0, 0, 1]).reshape(3, 3)
     R = Rx * Ry * Rz
     return R
 
@@ -68,7 +71,7 @@ class Image(object):
     def __init__(self, image_path: str, exiftool_obj=None, allow_uncalibrated=False):
         if not os.path.isfile(image_path):
             raise IOError("Provided path is not a file: {}".format(image_path))
-        self.path = image_path
+        self.path = str(image_path)
         self.meta = metadata.Metadata(self.path, exiftool_obj=exiftool_obj)
 
         if self.meta.band_name() is None:
@@ -228,7 +231,7 @@ class Image(object):
             except ImportError:
                 self.__raw_image = cv2.imread(self.path, -1)
             except IOError:
-                print(("Could not open image at path {}".format(self.path)))
+                logger.error("Could not open image at path %s", self.path)
                 raise
         return self.__raw_image
 

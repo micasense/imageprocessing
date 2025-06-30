@@ -23,8 +23,11 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+import logging 
+
 import numpy as np
 
+logger = logging.getLogger(__name__)
 # for DLS correction, we need the sun position at the time the image was taken
 # this can be computed using the pysolar package (ver 0.6)
 # https://pypi.python.org/pypi/Pysolar/0.6
@@ -49,7 +52,7 @@ except ImportError:
         havePysolar = True
 finally:
     if not havePysolar:
-        print("Unable to import pysolar")
+        logger.error("Unable to import pysolar")
 
 
 def fresnel(phi):

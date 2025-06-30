@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import math
 import re
+import logging
 
 import cv2
 import matplotlib.pyplot as plt
@@ -32,12 +33,14 @@ import numpy as np
 import pyzbar.pyzbar as pyzbar
 from skimage import measure
 
+logger = logging.getLogger(__name__)
+
 
 class Panel(object):
 
     def __init__(self, img, panel_corners=None, ignore_autocalibration=False):
         # if we have panel images with QR metadata, panel detection is not called,
-        # so this can be forced here 
+        # so this can be forced here
         if img is None:
             raise IOError("Must provide an image")
 
@@ -124,7 +127,7 @@ class Panel(object):
             return None
 
     def get_panel_type(self):
-        print(self.__panel_type)
+        logger.info(self.__panel_type)
 
     def qr_corners(self):
         if self.__panel_type == 'auto':
@@ -146,13 +149,13 @@ class Panel(object):
         return self.qr_bounds is not None
 
     def panel_corners(self):
-        """ get the corners of a panel region based on the qr code location 
+        """ get the corners of a panel region based on the qr code location
             Our algorithm to do this uses a 'reference' qr code location, and
             it's associate panel region.  We find the affine transform
             between the reference qr and our qr, and apply that same transform to the
             reference panel region to find our panel region. Because of a limitation
-            of the pyzbar library, the rotation of the absolute QR code isn't known, 
-            so we then try all 4 rotations and test against a cost function which is the 
+            of the pyzbar library, the rotation of the absolute QR code isn't known,
+            so we then try all 4 rotations and test against a cost function which is the
             minimum of the standard deviation divided by the mean value for the panel region"""
         if self.__panel_bounds is not None:
             return self.__panel_bounds
@@ -164,7 +167,7 @@ class Panel(object):
         if self.panel_version < 3:
             # use the actual panel measures here - we use units of [mm]
             # the panel is 154.4 x 152.4 mm , vs. the 84 x 84 mm for the QR code
-            # it is left 143.20 mm from the QR code 
+            # it is left 143.20 mm from the QR code
             # use the inner 50% square of the panel
             s = 76.2
             p = 42
@@ -177,7 +180,7 @@ class Panel(object):
         elif self.panel_version >= 6:
             # use the actual panel measures here - we use units of [mm]
             # the panel is 100 x 100 mm , vs. the 91 x 91 mm for the QR code
-            # it is down 125.94 mm from the QR code 
+            # it is down 125.94 mm from the QR code
             # use the inner 50% square of the panel
             p = 41
             s = 50
@@ -271,7 +274,7 @@ class Panel(object):
     def reflectance_mean(self):
         reflectance_image = self.image.reflectance()
         if reflectance_image is None:
-            print(
+            logger.info(
                 "First calculate the reflectance image by providing a\n band specific irradiance to the calling "
                 "image.reflectance(irradiance)")
         mean, _, _, _ = self.region_stats(reflectance_image,

@@ -28,9 +28,12 @@ from __future__ import unicode_literals
 import math
 import os
 from datetime import datetime, timedelta
+import logging
 
 import exiftool
 import pytz
+
+logger = logging.getLogger(__name__)
 
 
 class Metadata(object):
@@ -74,10 +77,10 @@ class Metadata(object):
         except KeyError:
             pass
         except IndexError:
-            print("Item {0} is length {1}, index {2} is outside this range.".format(
+            logger.error("Item %s is length %s, index %s is outside this range.",
                 item,
-                len(self.exif[item]),
-                index))
+                len(self.exif[0][item]),
+                index)
         return val
 
     def size(self, item):
@@ -98,7 +101,7 @@ class Metadata(object):
 
     def print_all(self):
         for item in self.get_all():
-            print("{}: {}".format(item, self.get_item(item)))
+            logger.info("%s: %s", item, self.get_item(item))
 
     def dls_present(self):
         return self.get_item("XMP:Irradiance") is not None \

@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import multiprocessing
 import os
+import logging
 
 import cv2
 import exiftool
@@ -34,6 +35,8 @@ from skimage.morphology import binary_closing
 from skimage.morphology import disk
 from skimage.transform import warp
 from skimage.util import img_as_ubyte
+
+logger = logging.getLogger(__name__)
 
 
 # start helper functions for finding a "hole"-free rectangle
@@ -206,7 +209,7 @@ def align(pair):
         nol = pair['pyramid_levels']
 
     if pair['debug']:
-        print(("number of pyramid levels: {}".format(nol)))
+        logger.info("number of pyramid levels: %s", nol)
 
     warp_matrix[0][2] /= (2 ** nol)
     warp_matrix[1][2] /= (2 ** nol)
@@ -244,7 +247,7 @@ def align(pair):
                 plotutils.plotwithcolorbar(gray2_pyr[level], "match level {}".format(level))
                 plotutils.plotwithcolorbar(grad1, "ref grad level {}".format(level))
                 plotutils.plotwithcolorbar(grad2, "match grad level {}".format(level))
-                print(("Starting warp for level {} is:\n {}".format(level, warp_matrix)))
+                logger.info(("Starting warp for level %s is:\n %s", level, warp_matrix)
 
             try:
                 cc, warp_matrix = cv2.findTransformECC(grad1, grad2, warp_matrix, warp_mode, criteria, inputMask=None,
@@ -253,7 +256,7 @@ def align(pair):
                 cc, warp_matrix = cv2.findTransformECC(grad1, grad2, warp_matrix, warp_mode, criteria)
 
             if show_debug_images:
-                print(("Warp after alignment level {} is \n{}".format(level, warp_matrix)))
+                logger.info("Warp after alignment level %s is \n%s", level, warp_matrix)
 
             if level != nol:  # scale up only the offset by a factor of 2 for the next (larger image) pyramid level
                 if warp_mode == cv2.MOTION_HOMOGRAPHY:
@@ -326,7 +329,7 @@ def align_capture(capture, ref_index=None, warp_mode=cv2.MOTION_HOMOGRAPHY, max_
         pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
         for _, mat in enumerate(pool.imap_unordered(align, alignment_pairs)):
             warp_matrices[mat['match_index']] = mat['warp_matrix']
-            print(("Finished aligning band {}".format(mat['match_index'])))
+            logger.info("Finished aligning band %s", mat['match_index'])
         pool.close()
         pool.join()
     else:
@@ -334,7 +337,7 @@ def align_capture(capture, ref_index=None, warp_mode=cv2.MOTION_HOMOGRAPHY, max_
         for pair in alignment_pairs:
             mat = align(pair)
             warp_matrices[mat['match_index']] = mat['warp_matrix']
-            print(("Finished aligning band {}".format(mat['match_index'])))
+            logger.info(("Finished aligning band %s", mat['match_index'])
 
     if capture.images[-1].band_name == 'LWIR':
         img = capture.images[-1]
@@ -509,7 +512,7 @@ def min_max(pts):
 
 def map_points(pts, image_size, warpMatrix, distortion_coeffs, camera_matrix, warp_mode=cv2.MOTION_HOMOGRAPHY):
     # extra dimension makes opencv happy
-    pts = np.array([pts], dtype=float)
+    pts = np.array([pts], dtype=np.float)
     new_cam_mat, _ = cv2.getOptimalNewCameraMatrix(camera_matrix, distortion_coeffs, image_size, 1)
     new_pts = cv2.undistortPoints(pts, camera_matrix, distortion_coeffs, P=new_cam_mat)
     if warp_mode == cv2.MOTION_AFFINE:
@@ -588,7 +591,7 @@ def radiometric_pan_sharpen(capture, warp_matrices=None, panchro_band=5, irradia
     # for comparison
     # use the warp matrices we have for the stack, if not user supplied
     if warp_matrices is None:
-        print("No SIFT warp matrices provided.")
+        logger.warning("No SIFT warp matrices provided.")
         warp_matrices = capture.get_warp_matrices(ref_index=panchro_band)
     h, w = capture.images[panchro_band].raw().shape
     if irradiance_list is None:
@@ -688,6 +691,8 @@ def write_exif_to_stack(thecapture=None, thefilename=None, existing_exif_list=No
         raise Exception(
             "Please provide an existing capture object and filename or a list of existing exif data for batch processing")
     exif_bytes_list = []
+    logger.debug("EXIF_DATA %s", exif_data)
+
     for exif in exif_data:
         for key, val in exif.items():
             if key != 'Capture ID' and key != 'Filename':

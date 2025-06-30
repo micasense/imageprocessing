@@ -44,6 +44,8 @@ import micasense.image as image
 import micasense.imageutils as imageutils
 import micasense.plotutils as plotutils
 
+logger = logging.getLogger(__name__)
+
 
 class Capture(object):
     """
@@ -814,7 +816,7 @@ class Capture(object):
         keypoints_ref = descriptor_extractor.keypoints
         descriptor_ref = descriptor_extractor.descriptors
         if verbose > 1:
-            print('found {:d} keypoints in the reference image'.format(len(keypoints_ref)))
+            logger.info('found %d keypoints in the reference image', len(keypoints_ref))
         match_images = []
         ratio = []
         filter_tr = []
@@ -844,8 +846,7 @@ class Capture(object):
             descriptors.append(descriptor_extractor.descriptors)
         if verbose > 1:
             for k, ix in zip(keypoints, img_index):
-                print('found {:d} keypoints for band {:} '.format(len(k), self.images[ix].band_name))
-            print(' in the remaining stack')
+                logger.info('found %d keypoints for band %s in the remainig stack', len(k), self.images[ix].band_name)
 
         matches = [match_descriptors(d, descriptor_ref, max_ratio=r)
                    for d, r in zip(descriptors, ratio)]
@@ -865,7 +866,7 @@ class Capture(object):
                 keypoints[posBLUE], keypoints_ref, matches[posBLUE])
             # we trust this match to work
             if len(kpi) < min_matches:
-                print('we have just {:d} matching keypoints -the match of BLUE camera to RED failed!!'.format(len(kpi)))
+                logger.error('we have just {:d} matching keypoints -the match of BLUE camera to RED failed!!'.format(len(kpi)))
             # if it worked, scale it and get the transform
             scale_i = np.array(self.images[iBlueREF].raw().shape) / np.array(rest_shape)
             P = estimate_transform('projective', (scale * kpr)[:, ::-1], (scale_i * kpi)[:, ::-1])
@@ -889,7 +890,7 @@ class Capture(object):
                                                                                     scale_i,
                                                                                     threshold=t)
             if verbose > 0:
-                print('found {:d} matching keypoints for index {:d}'.format(len(filtered_match), ix))
+                logger.info('found %d matching keypoints for index %d', len(filtered_match), ix)
             # if we have enough SIFT matches that actually correspond, compute a model
             if len(filtered_match) > min_matches:
                 kpi, kpr, imatch, model = self.find_inliers(filtered_kpi,
@@ -904,7 +905,7 @@ class Capture(object):
             else:
                 P = ProjectiveTransform(matrix=warp_matrices_calibrated[ix])
                 if verbose > 0:
-                    print('no match for index {:d}'.format(ix))
+                    logger.info('no match for index %d', ix)
             models.append(P)
             kp_image.append(kpi)
             kp_ref.append(kpr)
@@ -912,7 +913,7 @@ class Capture(object):
 
             # no need for the upsampled stacks here
             if verbose > 0:
-                print("Finished aligning band", ix)
+                logger.info("Finished aligning band %d", ix)
 
         self.__sift_aligned_capture = [np.eye(3)] * len(self.images)
         for ix, m in zip(img_index, models):
