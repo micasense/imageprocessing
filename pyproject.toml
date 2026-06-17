@@ -49,6 +49,10 @@ test = [
   "pytest >= 7.4.3",
   "pytest-cov",
 ]
+docs = [
+  "jupyter",
+  "nbconvert",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]

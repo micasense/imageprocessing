@@ -41,7 +41,7 @@ jobs:
         run: |
           pip install -e .[test]
           pytest -m "not newgdal" --cov=./ --cov-report=xml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: ${{ matrix.python-version == '3.12' }}
         with:
           name: coverage-report
